@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
     const y = ((rows - 1) / 2 - row) * (pieceSize + pieceGap);
-    return { x, y, z: 0.01 }; // piccolo offset per visibilità e click
+    return { x, y, z: 0.01 }; // piccolo offset Z
   }
 
   function createPiece(r, c) {
@@ -26,10 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
     plane.setAttribute("width", pieceSize);
     plane.setAttribute("height", pieceSize);
     plane.setAttribute("material", { src: `images/puzzle/row-${r+1}-column-${c+1}.jpg` });
+
     const pos = getWorldPos(r, c);
     plane.setAttribute("position", pos);
-    plane.dataset.row = r;
+
+    plane.dataset.row = r;          // posizione corrente
     plane.dataset.col = c;
+    plane.dataset.correctRow = r;   // posizione corretta
+    plane.dataset.correctCol = c;
+
     container.appendChild(plane);
     pieces.push(plane);
 
@@ -57,14 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function checkSolved() {
     let solved = true;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (r === emptyPos.row && c === emptyPos.col) continue;
-        const p = grid[`${r},${c}`];
-        if (!p) { solved = false; continue; }
-        if (parseInt(p.dataset.row) !== r || parseInt(p.dataset.col) !== c) {
-          solved = false;
-        }
+    for (let p of pieces) {
+      if (parseInt(p.dataset.row) !== parseInt(p.dataset.correctRow) ||
+          parseInt(p.dataset.col) !== parseInt(p.dataset.correctCol)) {
+        solved = false;
+        break;
       }
     }
     if (solved) alert("Puzzle completato 🎉");
@@ -112,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // CREAZIONE E SHUFFLE SOLO DOPO TARGET FOUND
+  // Creazione e shuffle solo dopo targetFound
   marker.addEventListener('targetFound', () => {
     pieces.length = 0;
     for (let r = 0; r < rows; r++) {
@@ -124,3 +126,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
