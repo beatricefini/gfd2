@@ -11,8 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = [];
   const pieces = [];
 
-  // Buco iniziale in basso a sinistra
-  let emptyPos = { row: 2, col: 0 };
+  let emptyPos = { row: 2, col: 0 }; // buco iniziale in basso a sinistra
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -26,8 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hole.setAttribute("width", pieceSize);
       hole.setAttribute("height", pieceSize);
       hole.setAttribute("material", { color: "#555555", opacity: 0.3, transparent: true });
-      const pos = getWorldPos(emptyPos.row, emptyPos.col);
-      hole.setAttribute("position", pos);
+      hole.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
       hole.setAttribute("id", "hole");
       container.appendChild(hole);
     }
@@ -41,9 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     plane.setAttribute("height", pieceSize);
     plane.setAttribute("material", { src: `images/puzzle/row-${r+1}-column-${c+1}.jpg` });
 
-    const pos = getWorldPos(r, c);
-    plane.setAttribute("position", pos);
-
+    plane.setAttribute("position", getWorldPos(r, c));
     plane.dataset.row = r;
     plane.dataset.col = c;
     plane.dataset.correctRow = r;
@@ -73,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const targetPos = getWorldPos(piece.dataset.row, piece.dataset.col);
     const startPos = piece.object3D.position.clone();
-    const duration = 250; // ms
+    const duration = 250;
     const startTime = performance.now();
 
     function easeOutQuad(t) { return t*(2-t); }
@@ -108,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (solved) {
       console.log("Puzzle completato! 🎉");
 
-      // Nascondi i pezzi e il buco
+      // Nascondi pezzi e buco
       pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.parentNode.removeChild(holeEl);
@@ -121,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
-      // Animazione fluttuante
+      // Fluttuazione per 3 secondi
       fullImage.setAttribute("animation__float", {
         property: "position",
         dir: "alternate",
@@ -131,13 +127,19 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
-      // Dopo 3 secondi, appiccica la foto al marker
+      // Dopo 3 secondi, scala interpolata e fissaggio sul marker
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
-        fullImage.setAttribute("position", { x: 0, y: 0, z: 0 }); // fissata sul marker
-        fullImage.setAttribute("rotation", { x: 0, y: 0, z: 0 }); // allineata al marker
-        console.log("Foto fissata come poster sul marker.");
-      }, 3000); // 3000ms = 3 secondi
+        fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
+        fullImage.setAttribute("animation__scale", {
+          property: "scale",
+          to: "0.5 0.5 1",
+          dur: 1000,
+          easing: "easeInOutQuad"
+        });
+        fullImage.setAttribute("position", { x:0, y:0, z:0 }); // fissata sul marker
+        console.log("Foto fissata come poster sul marker con scala fluida.");
+      }, 3000);
     }
   }
 
@@ -167,27 +169,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('touchstart', onPointerDown, { passive: false });
+  window.addEventListener('touchstart', onPointerDown, { passive:false });
 
-  function shuffle(times = 10) { // super facile
-    for (let i = 0; i < times; i++) {
+  function shuffle(times=10) {
+    for (let i=0;i<times;i++){
       const neighbors = [];
       const { row, col } = emptyPos;
       [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
         if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
       });
-      if (neighbors.length > 0) {
-        const piece = neighbors[Math.floor(Math.random() * neighbors.length)];
+      if(neighbors.length>0){
+        const piece = neighbors[Math.floor(Math.random()*neighbors.length)];
         tryMove(piece);
       }
     }
   }
 
   marker.addEventListener('targetFound', () => {
-    if (pieces.length === 0) {
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          createPiece(r, c);
+    if(pieces.length===0){
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          createPiece(r,c);
         }
       }
       createEmptyHole();
@@ -195,10 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Puzzle inizializzato e mescolato (super facile, buco in basso a sinistra).");
     } else {
       const holeEl = document.getElementById("hole");
-      if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
+      if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
       console.log("Marker riapparso, puzzle conservato.");
     }
   });
 
 });
+
 
