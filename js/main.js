@@ -12,17 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const pieces = [];
 
   let emptyPos = { row: 0, col: 3 }; // buco iniziale row-1 col-4
-  let selectedPiece = null;
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
     const y = ((rows - 1) / 2 - row) * (pieceSize + pieceGap);
-    return { x, y, z: 0 };
+    return { x, y, z: 0.01 }; // piccolo offset per visibilità e click
   }
 
-  // crea pezzi
   function createPiece(r, c) {
-    if(r === emptyPos.row && c === emptyPos.col) return; // salta il buco
+    if (r === emptyPos.row && c === emptyPos.col) return;
 
     const plane = document.createElement("a-plane");
     plane.setAttribute("width", pieceSize);
@@ -38,34 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
     grid[`${r},${c}`] = plane;
   }
 
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      createPiece(r,c);
-    }
+  function isAdjacent(r1, c1, r2, c2) {
+    return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
   }
 
-  // THREE.Raycaster
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  function updateMouse(event){
-    if(event.touches){
-      mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
-    } else {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    }
-  }
-
-  function isAdjacent(r1,c1,r2,c2){
-    return (Math.abs(r1-r2) + Math.abs(c1-c2)) === 1;
-  }
-
-  function tryMove(piece){
+  function tryMove(piece) {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
-    if(isAdjacent(r,c,emptyPos.row,emptyPos.col)){
+    if (isAdjacent(r, c, emptyPos.row, emptyPos.col)) {
       grid[`${r},${c}`] = null;
       const pos = getWorldPos(emptyPos.row, emptyPos.col);
       piece.setAttribute("position", pos);
@@ -77,51 +55,72 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function checkSolved(){
+  function checkSolved() {
     let solved = true;
-    for(let r=0;r<rows;r++){
-      for(let c=0;c<cols;c++){
-        if(r===emptyPos.row && c===emptyPos.col) continue;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (r === emptyPos.row && c === emptyPos.col) continue;
         const p = grid[`${r},${c}`];
-        if(!p) { solved = false; continue; }
-        if(parseInt(p.dataset.row)!==r || parseInt(p.dataset.col)!==c){
+        if (!p) { solved = false; continue; }
+        if (parseInt(p.dataset.row) !== r || parseInt(p.dataset.col) !== c) {
           solved = false;
         }
       }
     }
-    if(solved) alert("Puzzle completato 🎉");
+    if (solved) alert("Puzzle completato 🎉");
   }
 
-  function onPointerDown(event){
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function updateMouse(event) {
+    if (event.touches) {
+      mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+    } else {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+  }
+
+  function onPointerDown(event) {
     updateMouse(event);
     raycaster.setFromCamera(mouse, cameraEl.getObject3D('camera'));
     const intersects = raycaster.intersectObjects(
       pieces.map(p => p.object3D), true
     );
-    if(intersects.length>0){
+    if (intersects.length > 0) {
       const p = intersects[0].object.el;
       tryMove(p);
     }
   }
 
   window.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('touchstart', onPointerDown, {passive:false});
+  window.addEventListener('touchstart', onPointerDown, { passive: false });
 
-  // shuffle iniziale
-  function shuffle(times=100){
-    for(let i=0;i<times;i++){
+  function shuffle(times = 200) {
+    for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
       [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
         if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
       });
-      if(neighbors.length>0){
-        const piece = neighbors[Math.floor(Math.random()*neighbors.length)];
+      if (neighbors.length > 0) {
+        const piece = neighbors[Math.floor(Math.random() * neighbors.length)];
         tryMove(piece);
       }
     }
   }
 
-  shuffle(200);
+  // CREAZIONE E SHUFFLE SOLO DOPO TARGET FOUND
+  marker.addEventListener('targetFound', () => {
+    pieces.length = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        createPiece(r, c);
+      }
+    }
+    shuffle(200);
+  });
 
 });
