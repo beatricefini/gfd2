@@ -130,6 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
         loop: true,
         to: `0 0.2 0.02`
       });
+
+      // Dopo 3 secondi, appiccica la foto al marker
+      setTimeout(() => {
+        fullImage.removeAttribute("animation__float");
+        fullImage.setAttribute("position", { x: 0, y: 0, z: 0 }); // fissata sul marker
+        fullImage.setAttribute("rotation", { x: 0, y: 0, z: 0 }); // allineata al marker
+        console.log("Foto fissata come poster sul marker.");
+      }, 3000); // 3000ms = 3 secondi
     }
   }
 
@@ -161,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('mousedown', onPointerDown);
   window.addEventListener('touchstart', onPointerDown, { passive: false });
 
-  function shuffle(times = 10) { // meno mosse → super facile
+  function shuffle(times = 10) { // super facile
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
