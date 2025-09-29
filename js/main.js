@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = [];
   const pieces = [];
 
-  // Buco iniziale in alto a sinistra per puzzle più semplice
-  let emptyPos = { row: 0, col: 0 };
+  // Buco iniziale in basso a sinistra
+  let emptyPos = { row: 2, col: 0 };
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -63,8 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
     if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
-
-    const oldEmptyPos = { ...emptyPos };
 
     grid[`${r},${c}`] = null;
     piece.dataset.row = emptyPos.row;
@@ -137,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('mousedown', onPointerDown);
   window.addEventListener('touchstart', onPointerDown, { passive: false });
 
-  function shuffle(times = 50) { // meno mosse → più facile
+  function shuffle(times = 50) { // meno mosse → facile
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
@@ -160,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       createEmptyHole();
       shuffle(50);
-      console.log("Puzzle inizializzato e mescolato (versione facile).");
+      console.log("Puzzle inizializzato e mescolato (facile, buco in basso a sinistra).");
     } else {
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
