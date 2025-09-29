@@ -1,14 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
   const modelsContainer = document.getElementById("modelsContainer");
 
-  // Config puzzle (3x3 => 8 pezzi + 1 buco)
-  const rows = 3;
-  const cols = 3;
+  // Config puzzle (4x4 => 15 pezzi + 1 buco)
+  const rows = 4;
+  const cols = 4;
   let emptyPos = { row: rows - 1, col: cols - 1 };
   const grid = [];
 
-  // Dimensione pezzi e immagine
-  const pieceSize = 0.5;
+  // Dimensione tasselli e immagine
+  const pieceSize = 0.4;   // più piccolo per 4x4
   const imageUrl = "images/puzzle.jpg";
 
   // Crea tasselli
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Funzioni utili
+  // Calcola posizione nel mondo
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * pieceSize;
     const y = ((rows - 1) / 2 - row) * pieceSize;
@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     grid[`${r},${c}`] = entity;
   }
 
+  // Muovi un pezzo nel vuoto
   function tryMove(entity, check = true) {
     const r = parseInt(entity.dataset.row);
     const c = parseInt(entity.dataset.col);
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
   }
 
+  // Controllo puzzle completato
   function checkSolved() {
     let solved = true;
     for (let r = 0; r < rows; r++) {
@@ -88,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Shuffle iniziale
-  function shuffle(times = 100) {
+  function shuffle(times = 200) {
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
@@ -104,5 +106,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  shuffle(200); // puzzle parte mescolato
+  shuffle(300); // puzzle parte già mescolato
 });
