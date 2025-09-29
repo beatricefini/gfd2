@@ -1,112 +1,127 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const modelsContainer = document.getElementById("modelsContainer");
+  const marker = document.getElementById("marker");
+  const container = document.getElementById("piecesContainer");
+  const cameraEl = document.querySelector("a-camera");
 
   const rows = 4;
   const cols = 4;
+  const pieceSize = 0.25;
+  const pieceGap = 0.01;
 
-  // Buco iniziale: prima riga, quarta colonna (row-1, col-4)
-  let emptyPos = { row: 0, col: 3 };
   const grid = [];
+  const pieces = [];
 
-  const pieceSize = 0.25;  // più piccolo
-  const pieceGap = 0.01;   // margine tra tasselli
+  let emptyPos = { row: 0, col: 3 }; // buco iniziale row-1 col-4
+  let selectedPiece = null;
 
-  // Crea i tasselli
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (r === emptyPos.row && c === emptyPos.col) continue; // salta il buco
-
-      const piece = document.createElement("a-plane");
-      piece.setAttribute("width", pieceSize);
-      piece.setAttribute("height", pieceSize);
-
-      // r+1 e c+1 perché i file partono da 1
-      piece.setAttribute("material", {
-        src: `url(images/puzzle/row-${r+1}-column-${c+1}.jpg)`
-      });
-
-      piece.setAttribute("position", getWorldPos(r, c));
-      piece.classList.add("puzzle-piece");
-      piece.dataset.row = r;
-      piece.dataset.col = c;
-
-      piece.addEventListener("click", () => tryMove(piece));
-
-      modelsContainer.appendChild(piece);
-      gridKey(r, c, piece);
-    }
-  }
-
-  // Calcola la posizione di un tassello in base a riga/colonna
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
     const y = ((rows - 1) / 2 - row) * (pieceSize + pieceGap);
-    return `${x} ${y} 0`;
+    return { x, y, z: 0 };
   }
 
-  // Salva tassello nella griglia
-  function gridKey(r, c, entity) {
-    grid[`${r},${c}`] = entity;
+  // crea pezzi
+  function createPiece(r, c) {
+    if(r === emptyPos.row && c === emptyPos.col) return; // salta il buco
+
+    const plane = document.createElement("a-plane");
+    plane.setAttribute("width", pieceSize);
+    plane.setAttribute("height", pieceSize);
+    plane.setAttribute("material", { src: `images/puzzle/row-${r+1}-column-${c+1}.jpg` });
+    const pos = getWorldPos(r, c);
+    plane.setAttribute("position", pos);
+    plane.dataset.row = r;
+    plane.dataset.col = c;
+    container.appendChild(plane);
+    pieces.push(plane);
+
+    grid[`${r},${c}`] = plane;
   }
 
-  // Muove un tassello nel buco (solo se adiacente)
-  function tryMove(entity, check = true) {
-    const r = parseInt(entity.dataset.row);
-    const c = parseInt(entity.dataset.col);
-
-    if (isAdjacent(r, c, emptyPos.row, emptyPos.col)) {
-      grid[`${r},${c}`] = null;
-
-      entity.dataset.row = emptyPos.row;
-      entity.dataset.col = emptyPos.col;
-      entity.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
-
-      gridKey(emptyPos.row, emptyPos.col, entity);
-      emptyPos = { row: r, col: c };
-
-      if (check) checkSolved();
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      createPiece(r,c);
     }
   }
 
-  // Controlla se due celle sono adiacenti (orizzontale o verticale)
-  function isAdjacent(r1, c1, r2, c2) {
-    return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+  // THREE.Raycaster
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function updateMouse(event){
+    if(event.touches){
+      mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+    } else {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
   }
 
-  // Verifica se puzzle completato
-  function checkSolved() {
+  function isAdjacent(r1,c1,r2,c2){
+    return (Math.abs(r1-r2) + Math.abs(c1-c2)) === 1;
+  }
+
+  function tryMove(piece){
+    const r = parseInt(piece.dataset.row);
+    const c = parseInt(piece.dataset.col);
+    if(isAdjacent(r,c,emptyPos.row,emptyPos.col)){
+      grid[`${r},${c}`] = null;
+      const pos = getWorldPos(emptyPos.row, emptyPos.col);
+      piece.setAttribute("position", pos);
+      piece.dataset.row = emptyPos.row;
+      piece.dataset.col = emptyPos.col;
+      grid[`${emptyPos.row},${emptyPos.col}`] = piece;
+      emptyPos = { row: r, col: c };
+      checkSolved();
+    }
+  }
+
+  function checkSolved(){
     let solved = true;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (r === emptyPos.row && c === emptyPos.col) continue;
-        const piece = grid[`${r},${c}`];
-        if (!piece) { solved = false; continue; }
-        if (parseInt(piece.dataset.row) !== r || parseInt(piece.dataset.col) !== c) {
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(r===emptyPos.row && c===emptyPos.col) continue;
+        const p = grid[`${r},${c}`];
+        if(!p) { solved = false; continue; }
+        if(parseInt(p.dataset.row)!==r || parseInt(p.dataset.col)!==c){
           solved = false;
         }
       }
     }
-    if (solved) {
-      alert("Puzzle completato 🎉");
+    if(solved) alert("Puzzle completato 🎉");
+  }
+
+  function onPointerDown(event){
+    updateMouse(event);
+    raycaster.setFromCamera(mouse, cameraEl.getObject3D('camera'));
+    const intersects = raycaster.intersectObjects(
+      pieces.map(p => p.object3D), true
+    );
+    if(intersects.length>0){
+      const p = intersects[0].object.el;
+      tryMove(p);
     }
   }
 
-  // Mescola automaticamente
-  function shuffle(times = 300) {
-    for (let i = 0; i < times; i++) {
+  window.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('touchstart', onPointerDown, {passive:false});
+
+  // shuffle iniziale
+  function shuffle(times=100){
+    for(let i=0;i<times;i++){
       const neighbors = [];
       const { row, col } = emptyPos;
-
       [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
-        if (grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
+        if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
       });
-
-      if (neighbors.length > 0) {
-        const piece = neighbors[Math.floor(Math.random() * neighbors.length)];
-        tryMove(piece, false);
+      if(neighbors.length>0){
+        const piece = neighbors[Math.floor(Math.random()*neighbors.length)];
+        tryMove(piece);
       }
     }
   }
 
-  shuffle(400); // mescola all'avvio
+  shuffle(200);
+
 });

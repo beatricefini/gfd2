@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test AR Click Funzionante</title>
+  <title>AR Sliding Puzzle</title>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
@@ -24,31 +24,12 @@
 
     <!-- Target AR -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
-      <!-- Pezzo di test -->
-      <a-plane id="testPiece" 
-               position="0 0 0.01" 
-               width="0.3" 
-               height="0.3" 
-               color="#FF0000"
-               cursor-listener>
-      </a-plane>
+      <a-entity id="piecesContainer"></a-entity>
     </a-entity>
 
   </a-scene>
 
-  <script>
-    // Componente per catturare il click direttamente sul piano
-    AFRAME.registerComponent('cursor-listener', {
-      init: function () {
-        const el = this.el;
-        el.addEventListener('click', () => {
-          const newColor = "#" + Math.floor(Math.random()*16777215).toString(16);
-          el.setAttribute('color', newColor);
-          console.log("Pezzo cliccato! Colore cambiato a", newColor);
-        });
-      }
-    });
-  </script>
+  <script src="js/main.js"></script>
 </body>
 </html>
 
