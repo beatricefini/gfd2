@@ -19,6 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return { x, y, z: 0.01 };
   }
 
+  // crea buco visibile
+  function createEmptyHole() {
+    const hole = document.createElement("a-plane");
+    hole.setAttribute("width", pieceSize);
+    hole.setAttribute("height", pieceSize);
+    hole.setAttribute("material", { color: "#555555", opacity: 0.3, transparent: true });
+    const pos = getWorldPos(emptyPos.row, emptyPos.col);
+    hole.setAttribute("position", pos);
+    hole.setAttribute("id", "hole");
+    container.appendChild(hole);
+  }
+
   function createPiece(r, c) {
     if (r === emptyPos.row && c === emptyPos.col) return;
 
@@ -48,18 +60,40 @@ document.addEventListener("DOMContentLoaded", () => {
   function tryMove(piece) {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
-    if (isAdjacent(r, c, emptyPos.row, emptyPos.col)) {
-      grid[`${r},${c}`] = null;
-      const pos = getWorldPos(emptyPos.row, emptyPos.col);
-      piece.setAttribute("position", pos);
-      piece.dataset.row = emptyPos.row;
-      piece.dataset.col = emptyPos.col;
-      grid[`${emptyPos.row},${emptyPos.col}`] = piece;
-      emptyPos = { row: r, col: c };
+    if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
 
-      console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
-      checkSolved();
+    // salva vecchia posizione del buco
+    const oldEmptyPos = { ...emptyPos };
+
+    // aggiorna griglia logica
+    grid[`${r},${c}`] = null;
+    piece.dataset.row = emptyPos.row;
+    piece.dataset.col = emptyPos.col;
+    grid[`${emptyPos.row},${emptyPos.col}`] = piece;
+
+    emptyPos = { row: r, col: c };
+
+    // animazione fluida del pezzo verso il buco
+    const targetPos = getWorldPos(piece.dataset.row, piece.dataset.col);
+    const startPos = piece.object3D.position.clone();
+    const duration = 200; // ms
+    const startTime = performance.now();
+
+    function animate() {
+      const elapsed = performance.now() - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      piece.object3D.position.lerpVectors(startPos, targetPos, t);
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // aggiorna la posizione del buco visibile
+        const holeEl = document.getElementById("hole");
+        if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
+        console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
+        checkSolved();
+      }
     }
+    animate();
   }
 
   function checkSolved() {
@@ -116,14 +150,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Creazione e shuffle solo dopo targetFound
+  // Creazione, buco e shuffle solo dopo targetFound
   marker.addEventListener('targetFound', () => {
     pieces.length = 0;
+    container.innerHTML = "";
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         createPiece(r, c);
       }
     }
+    createEmptyHole();
     shuffle(200);
     console.log("Puzzle inizializzato e mescolato.");
   });
