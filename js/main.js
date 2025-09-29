@@ -3,15 +3,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("piecesContainer");
   const cameraEl = document.querySelector("a-camera");
 
-  const rows = 4;
-  const cols = 4;
-  const pieceSize = 0.25;
+  const rows = 3;
+  const cols = 3;
+  const pieceSize = 0.3;
   const pieceGap = 0.01;
 
   const grid = [];
   const pieces = [];
 
-  let emptyPos = { row: 0, col: 3 }; // buco iniziale row-1 col-4
+  let emptyPos = { row: 2, col: 2 }; // buco iniziale bottom-right
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -19,16 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return { x, y, z: 0.01 };
   }
 
-  // crea buco visibile
   function createEmptyHole() {
-    const hole = document.createElement("a-plane");
-    hole.setAttribute("width", pieceSize);
-    hole.setAttribute("height", pieceSize);
-    hole.setAttribute("material", { color: "#555555", opacity: 0.3, transparent: true });
-    const pos = getWorldPos(emptyPos.row, emptyPos.col);
-    hole.setAttribute("position", pos);
-    hole.setAttribute("id", "hole");
-    container.appendChild(hole);
+    if (!document.getElementById("hole")) {
+      const hole = document.createElement("a-plane");
+      hole.setAttribute("width", pieceSize);
+      hole.setAttribute("height", pieceSize);
+      hole.setAttribute("material", { color: "#555555", opacity: 0.3, transparent: true });
+      const pos = getWorldPos(emptyPos.row, emptyPos.col);
+      hole.setAttribute("position", pos);
+      hole.setAttribute("id", "hole");
+      container.appendChild(hole);
+    }
   }
 
   function createPiece(r, c) {
@@ -42,9 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const pos = getWorldPos(r, c);
     plane.setAttribute("position", pos);
 
-    plane.dataset.row = r;          // posizione corrente
+    plane.dataset.row = r;
     plane.dataset.col = c;
-    plane.dataset.correctRow = r;   // posizione corretta
+    plane.dataset.correctRow = r;
     plane.dataset.correctCol = c;
 
     container.appendChild(plane);
@@ -62,10 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const c = parseInt(piece.dataset.col);
     if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
 
-    // salva vecchia posizione del buco
     const oldEmptyPos = { ...emptyPos };
 
-    // aggiorna griglia logica
     grid[`${r},${c}`] = null;
     piece.dataset.row = emptyPos.row;
     piece.dataset.col = emptyPos.col;
@@ -73,20 +72,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     emptyPos = { row: r, col: c };
 
-    // animazione fluida del pezzo verso il buco
     const targetPos = getWorldPos(piece.dataset.row, piece.dataset.col);
     const startPos = piece.object3D.position.clone();
-    const duration = 200; // ms
+    const duration = 250; // ms
     const startTime = performance.now();
+
+    function easeOutQuad(t) { return t*(2-t); }
 
     function animate() {
       const elapsed = performance.now() - startTime;
       const t = Math.min(elapsed / duration, 1);
-      piece.object3D.position.lerpVectors(startPos, targetPos, t);
+      const easedT = easeOutQuad(t);
+      piece.object3D.position.lerpVectors(startPos, targetPos, easedT);
       if (t < 1) {
         requestAnimationFrame(animate);
       } else {
-        // aggiorna la posizione del buco visibile
         const holeEl = document.getElementById("hole");
         if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
         console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
@@ -150,18 +150,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Creazione, buco e shuffle solo dopo targetFound
   marker.addEventListener('targetFound', () => {
-    pieces.length = 0;
-    container.innerHTML = "";
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        createPiece(r, c);
+    if (pieces.length === 0) {
+      // crea pezzi solo se non esistono già
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          createPiece(r, c);
+        }
       }
+      createEmptyHole();
+      shuffle(200);
+      console.log("Puzzle inizializzato e mescolato.");
+    } else {
+      // marker riapparso, mantieni stato
+      const holeEl = document.getElementById("hole");
+      if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
+      console.log("Marker riapparso, puzzle conservato.");
     }
-    createEmptyHole();
-    shuffle(200);
-    console.log("Puzzle inizializzato e mescolato.");
   });
 
 });
