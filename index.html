@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Sliding Puzzle 4x4</title>
+  <title>AR Sliding Puzzle</title>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
@@ -15,6 +15,8 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
 
+    <a-assets></a-assets>
+
     <!-- Camera fissa -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
@@ -24,6 +26,7 @@
 
     <!-- Target AR -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
+      <!-- Puzzle container -->
       <a-entity id="modelsContainer"></a-entity>
     </a-entity>
 

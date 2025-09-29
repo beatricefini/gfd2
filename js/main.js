@@ -1,17 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
   const modelsContainer = document.getElementById("modelsContainer");
 
-  // Config puzzle (4x4 => 15 pezzi + 1 buco)
   const rows = 4;
   const cols = 4;
-  let emptyPos = { row: rows - 1, col: cols - 1 };
+
+  // Buco in row-1-column-4 → {0,3}
+  let emptyPos = { row: 0, col: 3 };
   const grid = [];
 
-  // Dimensione tasselli e immagine
-  const pieceSize = 0.4;   // più piccolo per 4x4
-  const imageUrl = "images/puzzle.jpg";
+  const pieceSize = 0.4;
 
-  // Crea tasselli
+  // Crea i tasselli
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (r === emptyPos.row && c === emptyPos.col) continue;
@@ -19,10 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const piece = document.createElement("a-plane");
       piece.setAttribute("width", pieceSize);
       piece.setAttribute("height", pieceSize);
+
+      // r+1 e c+1 perché i file partono da 1
       piece.setAttribute("material", {
-        src: `url(${imageUrl})`,
-        repeat: `${cols} ${rows}`,
-        offset: `${c / cols} ${1 - (r + 1) / rows}`
+        src: `url(images/puzzle/row-${r+1}-column-${c+1}.jpg)`
       });
 
       piece.setAttribute("position", getWorldPos(r, c));
@@ -37,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Calcola posizione nel mondo
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * pieceSize;
     const y = ((rows - 1) / 2 - row) * pieceSize;
@@ -48,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     grid[`${r},${c}`] = entity;
   }
 
-  // Muovi un pezzo nel vuoto
   function tryMove(entity, check = true) {
     const r = parseInt(entity.dataset.row);
     const c = parseInt(entity.dataset.col);
@@ -71,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
   }
 
-  // Controllo puzzle completato
   function checkSolved() {
     let solved = true;
     for (let r = 0; r < rows; r++) {
@@ -89,8 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Shuffle iniziale
-  function shuffle(times = 200) {
+  function shuffle(times = 300) {
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
@@ -106,5 +101,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  shuffle(300); // puzzle parte già mescolato
+  shuffle(400);
 });
