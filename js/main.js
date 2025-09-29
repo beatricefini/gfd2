@@ -4,16 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const rows = 4;
   const cols = 4;
 
-  // Buco in row-1-column-4 → {0,3}
+  // Buco iniziale: prima riga, quarta colonna (row-1, col-4)
   let emptyPos = { row: 0, col: 3 };
   const grid = [];
 
-  const pieceSize = 0.4;
+  const pieceSize = 0.25;  // più piccolo
+  const pieceGap = 0.01;   // margine tra tasselli
 
   // Crea i tasselli
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (r === emptyPos.row && c === emptyPos.col) continue;
+      if (r === emptyPos.row && c === emptyPos.col) continue; // salta il buco
 
       const piece = document.createElement("a-plane");
       piece.setAttribute("width", pieceSize);
@@ -36,16 +37,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Calcola la posizione di un tassello in base a riga/colonna
   function getWorldPos(row, col) {
-    const x = (col - (cols - 1) / 2) * pieceSize;
-    const y = ((rows - 1) / 2 - row) * pieceSize;
+    const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
+    const y = ((rows - 1) / 2 - row) * (pieceSize + pieceGap);
     return `${x} ${y} 0`;
   }
 
+  // Salva tassello nella griglia
   function gridKey(r, c, entity) {
     grid[`${r},${c}`] = entity;
   }
 
+  // Muove un tassello nel buco (solo se adiacente)
   function tryMove(entity, check = true) {
     const r = parseInt(entity.dataset.row);
     const c = parseInt(entity.dataset.col);
@@ -64,10 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Controlla se due celle sono adiacenti (orizzontale o verticale)
   function isAdjacent(r1, c1, r2, c2) {
     return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
   }
 
+  // Verifica se puzzle completato
   function checkSolved() {
     let solved = true;
     for (let r = 0; r < rows; r++) {
@@ -85,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Mescola automaticamente
   function shuffle(times = 300) {
     for (let i = 0; i < times; i++) {
       const neighbors = [];
@@ -101,5 +108,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  shuffle(400);
+  shuffle(400); // mescola all'avvio
 });
