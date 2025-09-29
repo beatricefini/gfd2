@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = [];
   const pieces = [];
 
-  let emptyPos = { row: 2, col: 2 }; // buco iniziale bottom-right
+  // Buco iniziale in alto a sinistra per puzzle più semplice
+  let emptyPos = { row: 0, col: 0 };
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -136,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('mousedown', onPointerDown);
   window.addEventListener('touchstart', onPointerDown, { passive: false });
 
-  function shuffle(times = 200) {
+  function shuffle(times = 50) { // meno mosse → più facile
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
@@ -152,17 +153,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   marker.addEventListener('targetFound', () => {
     if (pieces.length === 0) {
-      // crea pezzi solo se non esistono già
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           createPiece(r, c);
         }
       }
       createEmptyHole();
-      shuffle(200);
-      console.log("Puzzle inizializzato e mescolato.");
+      shuffle(50);
+      console.log("Puzzle inizializzato e mescolato (versione facile).");
     } else {
-      // marker riapparso, mantieni stato
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
       console.log("Marker riapparso, puzzle conservato.");
@@ -170,4 +169,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
