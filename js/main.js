@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
     const y = ((rows - 1) / 2 - row) * (pieceSize + pieceGap);
-    return { x, y, z: 0.01 }; // piccolo offset Z
+    return { x, y, z: 0.01 };
   }
 
   function createPiece(r, c) {
@@ -56,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
       piece.dataset.col = emptyPos.col;
       grid[`${emptyPos.row},${emptyPos.col}`] = piece;
       emptyPos = { row: r, col: c };
+
+      console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
       checkSolved();
     }
   }
@@ -69,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       }
     }
-    if (solved) alert("Puzzle completato 🎉");
+    if (solved) console.log("Puzzle completato! 🎉");
   }
 
   const raycaster = new THREE.Raycaster();
@@ -123,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     shuffle(200);
+    console.log("Puzzle inizializzato e mescolato.");
   });
 
 });
