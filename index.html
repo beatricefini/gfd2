@@ -15,12 +15,8 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
 
-    <!-- Camera con cursore mouse -->
-    <a-camera 
-      look-controls="enabled: false" 
-      cursor="rayOrigin: mouse" 
-      raycaster="objects: .clickable; recursive: true; far: 5">
-    </a-camera>
+    <!-- Camera fissa -->
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <!-- Luci -->
     <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
@@ -30,25 +26,29 @@
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
       <!-- Pezzo di test -->
       <a-plane id="testPiece" 
-               class="clickable"
                position="0 0 0.01" 
                width="0.3" 
                height="0.3" 
-               color="#FF0000">
+               color="#FF0000"
+               cursor-listener>
       </a-plane>
     </a-entity>
 
   </a-scene>
 
   <script>
-    const testPiece = document.getElementById("testPiece");
-
-    // Cambia colore al click
-    testPiece.addEventListener("click", () => {
-      const newColor = "#" + Math.floor(Math.random()*16777215).toString(16);
-      testPiece.setAttribute("color", newColor);
-      console.log("Pezzo cliccato! Colore cambiato a", newColor);
+    // Componente per catturare il click direttamente sul piano
+    AFRAME.registerComponent('cursor-listener', {
+      init: function () {
+        const el = this.el;
+        el.addEventListener('click', () => {
+          const newColor = "#" + Math.floor(Math.random()*16777215).toString(16);
+          el.setAttribute('color', newColor);
+          console.log("Pezzo cliccato! Colore cambiato a", newColor);
+        });
+      }
     });
   </script>
 </body>
 </html>
+
