@@ -104,7 +104,33 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       }
     }
-    if (solved) console.log("Puzzle completato! 🎉");
+
+    if (solved) {
+      console.log("Puzzle completato! 🎉");
+
+      // Nascondi i pezzi e il buco
+      pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
+      const holeEl = document.getElementById("hole");
+      if (holeEl) holeEl.parentNode.removeChild(holeEl);
+
+      // Mostra la foto completa
+      const fullImage = document.createElement("a-plane");
+      fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
+      fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
+      fullImage.setAttribute("material", { src: "images/puzzle.jpg" });
+      fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
+      container.appendChild(fullImage);
+
+      // Animazione fluttuante
+      fullImage.setAttribute("animation__float", {
+        property: "position",
+        dir: "alternate",
+        dur: 1500,
+        easing: "easeInOutSine",
+        loop: true,
+        to: `0 0.2 0.02`
+      });
+    }
   }
 
   const raycaster = new THREE.Raycaster();
@@ -135,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('mousedown', onPointerDown);
   window.addEventListener('touchstart', onPointerDown, { passive: false });
 
-  function shuffle(times = 50) { // meno mosse → facile
+  function shuffle(times = 10) { // meno mosse → super facile
     for (let i = 0; i < times; i++) {
       const neighbors = [];
       const { row, col } = emptyPos;
@@ -158,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       createEmptyHole();
       shuffle(10);
-      console.log("Puzzle inizializzato e mescolato (facile, buco in basso a sinistra).");
+      console.log("Puzzle inizializzato e mescolato (super facile, buco in basso a sinistra).");
     } else {
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
@@ -167,5 +193,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
-
 
