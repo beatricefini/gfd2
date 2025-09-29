@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       createEmptyHole();
-      shuffle(50);
+      shuffle(10);
       console.log("Puzzle inizializzato e mescolato (facile, buco in basso a sinistra).");
     } else {
       const holeEl = document.getElementById("hole");
