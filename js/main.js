@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fullImage = document.createElement("a-plane");
       fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
       fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
-      fullImage.setAttribute("material", { src: "images/puzzle.jpg" });
+      fullImage.setAttribute("material", { src: "images/puzzle.jpg", opacity: 1, transparent: true });
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
@@ -127,19 +127,40 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
-      // Dopo 3 secondi, scala interpolata e fissaggio sul marker
+      // Dopo 3s: scala fluida a 0.3, poi opacità 0.5 e cubo davanti
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
+
+        // Scala fluida
         fullImage.setAttribute("animation__scale", {
           property: "scale",
-          to: "0.5 0.5 1",
+          to: "0.3 0.3 1",
           dur: 1000,
           easing: "easeInOutQuad"
         });
-        fullImage.setAttribute("position", { x:0, y:0, z:0 }); // fissata sul marker
-        console.log("Foto fissata come poster sul marker con scala fluida.");
-      }, 3000);
+
+        // Dopo la scala (1s)
+        setTimeout(() => {
+          // Opacità fluida
+          fullImage.setAttribute("animation__opacity", {
+            property: "material.opacity",
+            to: 0.5,
+            dur: 500,
+            easing: "easeInOutQuad"
+          });
+
+          // Cubo 3D davanti al marker
+          const cube = document.createElement("a-box");
+          cube.setAttribute("width", 0.2);
+          cube.setAttribute("height", 0.2);
+          cube.setAttribute("depth", 0.2);
+          cube.setAttribute("material", { color: "#00FF00" });
+          cube.setAttribute("position", { x: 0, y: 0, z: 0.5 });
+          container.appendChild(cube);
+          console.log("Cubetto 3D posizionato davanti alla foto semi-trasparente.");
+        }, 1000); // scala dura 1s
+      }, 3000); // dopo 3s di fluttuazione
     }
   }
 
@@ -203,5 +224,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
-
 
