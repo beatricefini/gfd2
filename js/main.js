@@ -134,8 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const baseHeight = -0.25;
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model', '#cinemaModel');
-          cinemaModel.setAttribute('position', { x: 0, y: baseHeight, z: 0.5 });
-          cinemaModel.setAttribute('scale', { x: 0.8, y: 0.8, z: 0.8 });
+          cinemaModel.setAttribute('position', { x: 0, y: -0.1, z: 0.5 });
+          cinemaModel.setAttribute('scale', { x: 1, y: 1, z: 1 });
           container.appendChild(cinemaModel);
 
           // --- Testo "1960" ---
