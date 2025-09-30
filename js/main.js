@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const grid = [];
   const pieces = [];
-
-  let emptyPos = { row: 2, col: 0 }; // buco iniziale in basso a sinistra
+  let emptyPos = { row: 2, col: 0 }; // buco in basso a sinistra
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -33,21 +32,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createPiece(r, c) {
     if (r === emptyPos.row && c === emptyPos.col) return;
-
     const plane = document.createElement("a-plane");
     plane.setAttribute("width", pieceSize);
     plane.setAttribute("height", pieceSize);
     plane.setAttribute("material", { src: `images/puzzle/row-${r+1}-column-${c+1}.jpg` });
-
     plane.setAttribute("position", getWorldPos(r, c));
     plane.dataset.row = r;
     plane.dataset.col = c;
     plane.dataset.correctRow = r;
     plane.dataset.correctCol = c;
-
     container.appendChild(plane);
     pieces.push(plane);
-
     grid[`${r},${c}`] = plane;
   }
 
@@ -59,29 +54,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
     if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
-
     grid[`${r},${c}`] = null;
     piece.dataset.row = emptyPos.row;
     piece.dataset.col = emptyPos.col;
     grid[`${emptyPos.row},${emptyPos.col}`] = piece;
-
     emptyPos = { row: r, col: c };
 
     const targetPos = getWorldPos(piece.dataset.row, piece.dataset.col);
     const startPos = piece.object3D.position.clone();
     const duration = 250;
     const startTime = performance.now();
-
     function easeOutQuad(t) { return t*(2-t); }
-
     function animate() {
       const elapsed = performance.now() - startTime;
       const t = Math.min(elapsed / duration, 1);
       const easedT = easeOutQuad(t);
       piece.object3D.position.lerpVectors(startPos, targetPos, easedT);
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
+      if (t < 1) requestAnimationFrame(animate);
+      else {
         const holeEl = document.getElementById("hole");
         if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
         console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
@@ -100,16 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       }
     }
-
     if (solved) {
       console.log("Puzzle completato! 🎉");
-
-      // Nascondi pezzi e buco
       pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.parentNode.removeChild(holeEl);
 
-      // Mostra la foto completa
       const fullImage = document.createElement("a-plane");
       fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
       fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
@@ -117,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
-      // Fluttuazione per 3 secondi
       fullImage.setAttribute("animation__float", {
         property: "position",
         dir: "alternate",
@@ -127,12 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
-      // Dopo 3s: scala fluida a 0.3, poi opacità 0.5 e cubo davanti
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
-
-        // Scala fluida
         fullImage.setAttribute("animation__scale", {
           property: "scale",
           to: "0.3 0.3 1",
@@ -140,9 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
           easing: "easeInOutQuad"
         });
 
-        // Dopo la scala (1s)
         setTimeout(() => {
-          // Opacità fluida
           fullImage.setAttribute("animation__opacity", {
             property: "material.opacity",
             to: 0.5,
@@ -150,25 +130,68 @@ document.addEventListener("DOMContentLoaded", () => {
             easing: "easeInOutQuad"
           });
 
-          // Cubo 3D davanti al marker
-          const cube = document.createElement("a-box");
-          cube.setAttribute("width", 0.2);
-          cube.setAttribute("height", 0.2);
-          cube.setAttribute("depth", 0.2);
-          cube.setAttribute("material", { color: "#00FF00" });
-          cube.setAttribute("position", { x: 0, y: 0, z: 0.5 });
-          container.appendChild(cube);
-          console.log("Cubetto 3D posizionato davanti alla foto semi-trasparente.");
-        }, 1000); // scala dura 1s
-      }, 3000); // dopo 3s di fluttuazione
+          // --- Modello Cinema ---
+          const baseHeight = -0.25;
+          const cinemaModel = document.createElement('a-entity');
+          cinemaModel.setAttribute('gltf-model', '#cinemaModel');
+          cinemaModel.setAttribute('position', { x: 0, y: baseHeight, z: 0.5 });
+          cinemaModel.setAttribute('scale', { x: 0.8, y: 0.8, z: 0.8 });
+          container.appendChild(cinemaModel);
+
+          // --- Testo "1960" ---
+          const text1960 = document.createElement('a-text');
+          text1960.setAttribute('value', '1960');
+          text1960.setAttribute('align', 'center');
+          text1960.setAttribute('anchor', 'center');
+          text1960.setAttribute('color', '#000000');
+          text1960.setAttribute('font', 'roboto');
+          text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z: 0.5 });
+          text1960.setAttribute('scale', '0.35 0.35 0.35');
+          text1960.setAttribute('opacity', '0');
+          text1960.setAttribute('shader', 'msdf');
+          text1960.setAttribute('negate', 'false');
+          text1960.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 200
+          });
+          container.appendChild(text1960);
+
+          // --- Testo "New facade" ---
+          const textFacade = document.createElement('a-text');
+          textFacade.setAttribute('value', 'New facade');
+          textFacade.setAttribute('align', 'center');
+          textFacade.setAttribute('anchor', 'center');
+          textFacade.setAttribute('color', '#000000');
+          textFacade.setAttribute('font', 'roboto');
+          textFacade.setAttribute('position', { x:0, y: baseHeight+0.35, z: 0.5 });
+          textFacade.setAttribute('scale', '0.25 0.25 0.25');
+          textFacade.setAttribute('opacity', '0');
+          textFacade.setAttribute('shader', 'msdf');
+          textFacade.setAttribute('negate', 'false');
+          textFacade.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 1200
+          });
+          container.appendChild(textFacade);
+
+          console.log("Modello cinema e testi visualizzati davanti alla foto semi-trasparente.");
+        }, 1000);
+      }, 3000);
     }
   }
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-
   function updateMouse(event) {
-    if (event.touches) {
+    if(event.touches){
       mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
     } else {
@@ -183,9 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const intersects = raycaster.intersectObjects(
       pieces.map(p => p.object3D), true
     );
-    if (intersects.length > 0) {
-      const p = intersects[0].object.el;
-      tryMove(p);
+    if(intersects.length>0){
+      tryMove(intersects[0].object.el);
     }
   }
 
