@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
           text1960.setAttribute('color', '#000000');
           text1960.setAttribute('font', 'roboto');
           text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z: 0.5 });
-          text1960.setAttribute('scale', '0.35 0.35 0.35');
+          text1960.setAttribute('scale', '0.5 0.5 0.5');
           text1960.setAttribute('opacity', '0');
           text1960.setAttribute('shader', 'msdf');
           text1960.setAttribute('negate', 'false');
@@ -167,8 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
           textFacade.setAttribute('anchor', 'center');
           textFacade.setAttribute('color', '#000000');
           textFacade.setAttribute('font', 'roboto');
-          textFacade.setAttribute('position', { x:0, y: baseHeight+0.35, z: 0.5 });
-          textFacade.setAttribute('scale', '0.25 0.25 0.25');
+          textFacade.setAttribute('position', { x:0, y: baseHeight+0.4, z: 0.5 });
+          textFacade.setAttribute('scale', '0.35 0.35 0.35');
           textFacade.setAttribute('opacity', '0');
           textFacade.setAttribute('shader', 'msdf');
           textFacade.setAttribute('negate', 'false');
