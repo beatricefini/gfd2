@@ -8,15 +8,11 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    :root { --instructions-scale: 100%; }
-
     /* Overlay base */
     .overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background: black;
       display: flex;
       justify-content: center;
@@ -26,23 +22,22 @@
       transition: opacity 1s ease-in-out;
       z-index: 9999;
     }
-    .overlay img {
-      max-width: var(--instructions-scale);
-      max-height: var(--instructions-scale);
-      width: auto;
-      height: auto;
-    }
+    .overlay img { width: 100%; height: auto; }
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
     /* Tap to Start */
     #tapText {
-      margin-top: 20px;
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 1.2rem;
       color: black;
       font-family: 'Roboto', sans-serif;
       cursor: pointer;
       opacity: 0;
+      z-index: 2;
       transition: opacity 1s ease-in-out;
     }
     #tapText.show { opacity: 1; }
@@ -50,10 +45,8 @@
     /* Custom scanning UI */
     #custom-scanning-ui {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       pointer-events: none;
       display: flex;
       justify-content: center;
@@ -111,7 +104,7 @@
   </div>
 
   <!-- Overlay instructions -->
-  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0; flex-direction: column;">
+  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0; flex-direction: column; position: relative;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
@@ -177,15 +170,16 @@
         // Instructions overlay
         instructions.style.opacity = 1;
         setTimeout(() => instructions.classList.add("show"), 100);
-        // Mostra subito il tap
-        setTimeout(() => tapText.classList.add("show"), 500);
+        // Tap subito visibile
+        tapText.classList.add("show");
 
-        // Tap click
+        // Tap listener
         tapText.addEventListener("click", async () => {
           instructions.classList.remove("show");
           instructions.classList.add("hide");
-          setTimeout(() => instructions.remove(), 1000);
+          setTimeout(() => instructions.remove(), 500);
 
+          // Mostra scena AR
           sceneEl.style.display = "flex";
           const mindarSystem = sceneEl.systems["mindar-image-system"];
           await mindarSystem.start();
@@ -201,7 +195,7 @@
             scanningUI.classList.add("visible");
           });
 
-          // Remove VR button
+          // Rimuovi pulsante VR
           const vrButton = document.querySelector(".a-enter-vr-button");
           if(vrButton) vrButton.remove();
         }, { once: true });
