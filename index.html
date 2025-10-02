@@ -48,7 +48,7 @@
       opacity: 1;
     }
 
-    /* MindAR custom scanning UI */
+    /* Custom scanning UI */
     #custom-scanning-ui {
       position: fixed;
       top: 0;
@@ -59,33 +59,35 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       z-index: 998;
-      opacity: 1;
-      transition: opacity 0.5s ease;
     }
 
-    .rect-scanner {
-      width: 80vw;      /* larghezza rettangolo */
-      height: 40vh;     /* altezza rettangolo */
+    /* Angoli */
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
       border: 4px solid #00ff00;
-      box-sizing: border-box;
-      pointer-events: none;
-      position: relative;
     }
 
-    .scanning-text {
-      margin-top: 20px;
-      color: white;
-      font-size: 1.5rem;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      pointer-events: none;
+    .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
+    .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
+    .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
+    .bottom-right { bottom: 10%; right: 10%; border-left: none; border-top: none; }
+
+    /* Barra centrale animata */
+    #custom-scanning-ui .scan-bar {
+      position: absolute;
+      width: calc(80%); /* larghezza rettangolo tra i corner */
+      height: 4px;
+      background: #00ff00;
+      top: 10%;
+      animation: moveBar 2s infinite alternate ease-in-out;
     }
 
-    #custom-scanning-ui.hidden {
-      opacity: 0;
-      pointer-events: none;
+    @keyframes moveBar {
+      0% { top: 10%; }
+      100% { top: 70%; }
     }
 
     /* Inizio scena nascosta */
@@ -109,8 +111,14 @@
 
   <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="hidden">
-    <div class="rect-scanner"></div>
-    <div class="scanning-text">Scanning environment...</div>
+    <!-- Angoli -->
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <!-- Barra centrale animata -->
+    <div class="scan-bar"></div>
   </div>
 
   <!-- Scena AR -->
@@ -172,11 +180,11 @@
 
             // Avvia MindAR manualmente
             const mindarSystem = sceneEl.systems["mindar-image-system"];
-            await mindarSystem.start(); // avvia camera e scanning
+            await mindarSystem.start();
           }, { once: true });
 
-        }, 1000); // fadeout intro
-      }, 5000); // 1s fadein + 4s visibile
+        }, 1000);
+      }, 5000);
     });
   </script>
 
