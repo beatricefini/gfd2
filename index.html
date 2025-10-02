@@ -108,6 +108,11 @@
     <div id="tapText">Tap to start</div>
   </div>
 
+  <!-- Overlay finale: outro2.png -->
+  <div id="outroOverlay" class="overlay" style="display: flex; opacity: 0;">
+    <img src="images/outro2.png" alt="Outro">
+  </div>
+
   <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
@@ -141,65 +146,5 @@
   </a-scene>
 
   <script src="js/main.js"></script>
-
-  <!-- Script overlay e avvio MindAR -->
-  <script>
-    window.addEventListener("load", () => {
-      const intro = document.getElementById("introOverlay");
-      const instructions = document.getElementById("instructionsOverlay");
-      const tapText = document.getElementById("tapText");
-      const sceneEl = document.querySelector("a-scene");
-      const scanningUI = document.getElementById("custom-scanning-ui");
-
-      // Overlay 1 (count2.png)
-      setTimeout(() => intro.classList.add("show"), 100);
-      setTimeout(() => {
-        intro.classList.remove("show");
-        intro.classList.add("hide");
-        setTimeout(() => {
-          intro.remove();
-
-          // Mostra overlay 2
-          instructions.style.opacity = 1;
-          setTimeout(() => instructions.classList.add("show"), 100);
-
-          // Dopo 3s appare "Tap to start"
-          setTimeout(() => tapText.classList.add("show"), 3000);
-
-          // Al click l'utente fa partire l'esperienza
-          instructions.addEventListener("click", async () => {
-            instructions.classList.remove("show");
-            instructions.classList.add("hide");
-            setTimeout(() => instructions.remove(), 1000);
-
-            // Mostra la scena AR
-            sceneEl.style.display = "flex";
-
-            // Avvia MindAR manualmente
-            const mindarSystem = sceneEl.systems["mindar-image-system"];
-            await mindarSystem.start();
-
-            // Rimuove pulsante VR se ancora presente
-            const vrButton = document.querySelector(".a-enter-vr-button");
-            if(vrButton) vrButton.remove();
-
-            // Gestione visibilità scanner
-            const marker = document.getElementById("marker");
-            marker.addEventListener("targetFound", () => {
-              scanningUI.classList.remove("visible");
-              scanningUI.classList.add("hidden");
-            });
-            marker.addEventListener("targetLost", () => {
-              scanningUI.classList.remove("hidden");
-              scanningUI.classList.add("visible");
-            });
-
-          }, { once: true });
-
-        }, 1000);
-      }, 5000);
-    });
-  </script>
-
 </body>
 </html>

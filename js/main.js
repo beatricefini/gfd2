@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const container = document.getElementById("piecesContainer");
   const cameraEl = document.querySelector("a-camera");
+  const scanningUI = document.getElementById("custom-scanning-ui");
+  const outro = document.getElementById("outroOverlay");
 
   const rows = 3;
   const cols = 3;
@@ -54,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
     if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
+
     grid[`${r},${c}`] = null;
     piece.dataset.row = emptyPos.row;
     piece.dataset.col = emptyPos.col;
@@ -65,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const duration = 250;
     const startTime = performance.now();
     function easeOutQuad(t) { return t*(2-t); }
+
     function animate() {
       const elapsed = performance.now() - startTime;
       const t = Math.min(elapsed / duration, 1);
@@ -74,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else {
         const holeEl = document.getElementById("hole");
         if (holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
-        console.log(`Pezzo mosso: row=${piece.dataset.row}, col=${piece.dataset.col}`);
         checkSolved();
       }
     }
@@ -91,11 +94,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     if (solved) {
-      console.log("Puzzle completato! 🎉");
+      // Rimuovi pezzi puzzle e hole
       pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.parentNode.removeChild(holeEl);
 
+      // Mostra immagine completa
       const fullImage = document.createElement("a-plane");
       fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
       fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
@@ -103,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
+      // Animazione float
       fullImage.setAttribute("animation__float", {
         property: "position",
         dir: "alternate",
@@ -112,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
+      // Animazioni modello cinema e testi
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
@@ -130,26 +136,24 @@ document.addEventListener("DOMContentLoaded", () => {
             easing: "easeInOutQuad"
           });
 
-          // --- Modello Cinema ---
-          const baseHeight = -0.25;
+          // Modello Cinema
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model', '#cinemaModel');
           cinemaModel.setAttribute('position', { x: 0.1, y: -0.4, z: 0.5 });
           cinemaModel.setAttribute('scale', { x: 2, y: 2, z: 2 });
           container.appendChild(cinemaModel);
 
-          // --- Testo "1960" ---
+          // Testo 1960
           const text1960 = document.createElement('a-text');
           text1960.setAttribute('value', '1960');
           text1960.setAttribute('align', 'center');
           text1960.setAttribute('anchor', 'center');
           text1960.setAttribute('color', '#000000');
           text1960.setAttribute('font', 'roboto');
-          text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z: 0.5 });
+          text1960.setAttribute('position', { x:0, y:0.25, z:0.5 });
           text1960.setAttribute('scale', '0.5 0.5 0.5');
           text1960.setAttribute('opacity', '0');
           text1960.setAttribute('shader', 'msdf');
-          text1960.setAttribute('negate', 'false');
           text1960.setAttribute('animation__fadein', {
             property: 'opacity',
             from: 0,
@@ -160,18 +164,17 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(text1960);
 
-          // --- Testo "New facade" ---
+          // Testo New facade
           const textFacade = document.createElement('a-text');
           textFacade.setAttribute('value', 'New facade');
           textFacade.setAttribute('align', 'center');
           textFacade.setAttribute('anchor', 'center');
           textFacade.setAttribute('color', '#000000');
           textFacade.setAttribute('font', 'roboto');
-          textFacade.setAttribute('position', { x:0, y: baseHeight+0.4, z: 0.5 });
+          textFacade.setAttribute('position', { x:0, y:0.15, z:0.5 });
           textFacade.setAttribute('scale', '0.35 0.35 0.35');
           textFacade.setAttribute('opacity', '0');
           textFacade.setAttribute('shader', 'msdf');
-          textFacade.setAttribute('negate', 'false');
           textFacade.setAttribute('animation__fadein', {
             property: 'opacity',
             from: 0,
@@ -182,12 +185,18 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
-          console.log("Modello cinema e testi visualizzati davanti alla foto semi-trasparente.");
+          // Dopo 5 secondi mostra overlay outro
+          setTimeout(() => {
+            outro.style.display = "flex";
+            setTimeout(() => outro.classList.add("show"), 100);
+          }, 5000);
+
         }, 1000);
       }, 3000);
     }
   }
 
+  // Raycaster e gestione touch/click
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   function updateMouse(event) {
@@ -199,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
   }
-
   function onPointerDown(event) {
     updateMouse(event);
     raycaster.setFromCamera(mouse, cameraEl.getObject3D('camera'));
@@ -210,10 +218,10 @@ document.addEventListener("DOMContentLoaded", () => {
       tryMove(intersects[0].object.el);
     }
   }
-
   window.addEventListener('mousedown', onPointerDown);
   window.addEventListener('touchstart', onPointerDown, { passive:false });
 
+  // Shuffle iniziale
   function shuffle(times=10) {
     for (let i=0;i<times;i++){
       const neighbors = [];
@@ -228,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Inizializzazione puzzle al targetFound
   marker.addEventListener('targetFound', () => {
     if(pieces.length===0){
       for(let r=0;r<rows;r++){
@@ -237,11 +246,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       createEmptyHole();
       shuffle(10);
-      console.log("Puzzle inizializzato e mescolato (super facile, buco in basso a sinistra).");
     } else {
       const holeEl = document.getElementById("hole");
       if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
-      console.log("Marker riapparso, puzzle conservato.");
     }
   });
 
