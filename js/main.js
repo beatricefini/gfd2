@@ -137,31 +137,47 @@ document.addEventListener("DOMContentLoaded", () => {
           cinemaModel.setAttribute('scale',{x:2,y:2,z:2});
           container.appendChild(cinemaModel);
 
-          // --- Testo "1960" ---
-const text1960 = document.createElement('a-text');
-text1960.setAttribute('value', '1960');
-text1960.setAttribute('align', 'center');
-text1960.setAttribute('anchor', 'center');
-text1960.setAttribute('color', '#000000');        // colore interno
-text1960.setAttribute('font', '#myFont');         // font personalizzato
-text1960.setAttribute('shader', 'msdf');
-text1960.setAttribute('negate', 'false');         // necessario per MSDF
-text1960.setAttribute('strokeColor', '#ffffff');  // colore bordo
-text1960.setAttribute('strokeWidth', 0.02);       // larghezza bordo
-container.appendChild(text1960);
+          // Testo "1960"
+          const text1960 = document.createElement('a-text');
+          text1960.setAttribute('value', '1960');
+          text1960.setAttribute('align', 'center');
+          text1960.setAttribute('anchor', 'center');
+          text1960.setAttribute('color', '#000000');
+          text1960.setAttribute('font', 'roboto'); // font originale
+          text1960.setAttribute('position', { x:0, y:0.5, z:0.5 });
+          text1960.setAttribute('scale', '0.5 0.5 0.5');
+          text1960.setAttribute('opacity', '0');
+          text1960.setAttribute('shader', 'msdf');
+          text1960.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 200
+          });
+          container.appendChild(text1960);
 
-// --- Testo "New facade" ---
-const textFacade = document.createElement('a-text');
-textFacade.setAttribute('value', 'New facade');
-textFacade.setAttribute('align', 'center');
-textFacade.setAttribute('anchor', 'center');
-textFacade.setAttribute('color', '#000000');
-textFacade.setAttribute('font', '#myFont');      // font personalizzato
-textFacade.setAttribute('shader', 'msdf');
-textFacade.setAttribute('negate', 'false');
-textFacade.setAttribute('strokeColor', '#ffffff');  
-textFacade.setAttribute('strokeWidth', 0.02);
-container.appendChild(textFacade);
+          // Testo "New facade"
+          const textFacade = document.createElement('a-text');
+          textFacade.setAttribute('value', 'New facade');
+          textFacade.setAttribute('align', 'center');
+          textFacade.setAttribute('anchor', 'center');
+          textFacade.setAttribute('color', '#000000');
+          textFacade.setAttribute('font', 'roboto'); // font originale
+          textFacade.setAttribute('position', { x:0, y:0.4, z:0.5 });
+          textFacade.setAttribute('scale', '0.35 0.35 0.35');
+          textFacade.setAttribute('opacity', '0');
+          textFacade.setAttribute('shader', 'msdf');
+          textFacade.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 1200
+          });
+          container.appendChild(textFacade);
 
           setTimeout(showOutro,10000); // durata finale scena
         },1000);
@@ -278,8 +294,8 @@ container.appendChild(textFacade);
       puzzleText.setAttribute('align','center');
       puzzleText.setAttribute('anchor','center');
       puzzleText.setAttribute('color','#000000'); // solo nero
-      puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
-      puzzleText.setAttribute('scale','0.5 0.5 0.5');
+      puzzleText.setAttribute('position',{x:0, y:0.65, z:0.5});
+      puzzleText.setAttribute('scale','0.25 0.25 0.25');
       puzzleText.setAttribute('id','puzzleText');
       container.appendChild(puzzleText);
 
