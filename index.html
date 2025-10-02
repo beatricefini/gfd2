@@ -4,20 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Puzzle Cinema</title>
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <!-- MindAR AR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
-<body>
+<body style="margin:0; overflow:hidden;">
   <a-scene
-    mindar-image="imageTargetSrc: targets/target.mind"
+    mindar-image="imageTargetSrc: targets/target.mind; autoStart: true;"
     color-space="sRGB"
     renderer="colorManagement: true"
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
+    device-orientation-permission-ui="enabled: false"
+    embedded>
 
     <a-assets>
       <a-asset-item id="cinemaModel" src="models/piece_cinema2.glb"></a-asset-item>
-      <!-- altri asset se necessari -->
+      <!-- aggiungi qui eventuali immagini dei puzzle -->
     </a-assets>
 
     <!-- Camera bloccata -->
@@ -29,13 +32,15 @@
 
     <!-- Target AR -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
-      <!-- Contenitore pezzi puzzle e modello -->
       <a-entity id="piecesContainer"></a-entity>
     </a-entity>
 
+    <!-- Componente JS Puzzle -->
+    <a-entity id="puzzleJS"></a-entity>
+
   </a-scene>
 
+  <!-- Main JS -->
   <script src="js/main.js"></script>
 </body>
 </html>
-
