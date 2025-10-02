@@ -87,9 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     if(solved){
-      // Rimuove testo puzzle
+      // Rimuove la scritta "Solve the sliding puzzle"
       const puzzleText = document.getElementById('puzzleText');
-      if(puzzleText) puzzleText.parentNode.removeChild(puzzleText);
+      if(puzzleText) puzzleText.remove();
 
       pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
       const holeEl = document.getElementById("hole");
@@ -137,51 +137,33 @@ document.addEventListener("DOMContentLoaded", () => {
           cinemaModel.setAttribute('scale',{x:2,y:2,z:2});
           container.appendChild(cinemaModel);
 
-          // Testi finali con fade unico
-          const baseHeight = 0;
-          const text1960 = document.createElement('a-text');
-          text1960.setAttribute('value', '1960');
-          text1960.setAttribute('align', 'center');
-          text1960.setAttribute('anchor', 'center');
-          text1960.setAttribute('color', '#000000');
-          text1960.setAttribute('font', 'roboto');
-          text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z:0.5 });
-          text1960.setAttribute('scale', '0.5 0.5 0.5');
-          text1960.setAttribute('opacity', '0');
-          text1960.setAttribute('shader', 'msdf');
-          text1960.setAttribute('negate', 'false');
-          text1960.setAttribute('animation__fadein', {
-            property: 'opacity',
-            from: 0,
-            to: 1,
-            dur: 800,
-            easing: 'easeInQuad',
-            delay: 200
-          });
-          container.appendChild(text1960);
+          // --- Testo "1960" ---
+const text1960 = document.createElement('a-text');
+text1960.setAttribute('value', '1960');
+text1960.setAttribute('align', 'center');
+text1960.setAttribute('anchor', 'center');
+text1960.setAttribute('color', '#000000');        // colore interno
+text1960.setAttribute('font', '#myFont');         // font personalizzato
+text1960.setAttribute('shader', 'msdf');
+text1960.setAttribute('negate', 'false');         // necessario per MSDF
+text1960.setAttribute('strokeColor', '#ffffff');  // colore bordo
+text1960.setAttribute('strokeWidth', 0.02);       // larghezza bordo
+container.appendChild(text1960);
 
-          const textFacade = document.createElement('a-text');
-          textFacade.setAttribute('value', 'New facade');
-          textFacade.setAttribute('align', 'center');
-          textFacade.setAttribute('anchor', 'center');
-          textFacade.setAttribute('color', '#000000');
-          textFacade.setAttribute('font', 'roboto');
-          textFacade.setAttribute('position', { x:0, y: baseHeight+0.4, z:0.5 });
-          textFacade.setAttribute('scale', '0.35 0.35 0.35');
-          textFacade.setAttribute('opacity', '0');
-          textFacade.setAttribute('shader', 'msdf');
-          textFacade.setAttribute('negate', 'false');
-          textFacade.setAttribute('animation__fadein', {
-            property: 'opacity',
-            from: 0,
-            to: 1,
-            dur: 800,
-            easing: 'easeInQuad',
-            delay: 1200
-          });
-          container.appendChild(textFacade);
+// --- Testo "New facade" ---
+const textFacade = document.createElement('a-text');
+textFacade.setAttribute('value', 'New facade');
+textFacade.setAttribute('align', 'center');
+textFacade.setAttribute('anchor', 'center');
+textFacade.setAttribute('color', '#000000');
+textFacade.setAttribute('font', '#myFont');      // font personalizzato
+textFacade.setAttribute('shader', 'msdf');
+textFacade.setAttribute('negate', 'false');
+textFacade.setAttribute('strokeColor', '#ffffff');  
+textFacade.setAttribute('strokeWidth', 0.02);
+container.appendChild(textFacade);
 
-          setTimeout(showOutro, 10000); // durata finale scena
+          setTimeout(showOutro,10000); // durata finale scena
         },1000);
       },3000);
     }
@@ -214,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(()=>{outroOverlay.style.opacity="1";},100);
   }
 
-  // Raycaster
+  // Raycaster per puzzle
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   function updateMouse(event){
@@ -249,23 +231,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  marker.addEventListener('targetFound',()=>{
+  // OVERLAY LOGIC
+  const intro = document.getElementById("introOverlay");
+  const instructions = document.getElementById("instructionsOverlay");
+  const tapText = document.getElementById("tapText");
+  const sceneEl = document.querySelector("a-scene");
+
+  // Overlay 1
+  setTimeout(() => intro.classList.add("show"), 100);
+  setTimeout(() => {
+    intro.classList.remove("show");
+    intro.classList.add("hide");
+    setTimeout(() => { intro.remove(); 
+      // Overlay 2
+      instructions.style.opacity = 1;
+      setTimeout(() => instructions.classList.add("show"), 100);
+      setTimeout(() => tapText.classList.add("show"), 500);
+
+      instructions.addEventListener("click", async () => {
+        // Fade out overlay
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(()=> instructions.remove(), 1000);
+
+        sceneEl.style.display = "flex";
+
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
+
+        // Rimuove pulsante VR
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if(vrButton) vrButton.remove();
+      }, { once: true });
+    }, 1000);
+  }, 5000);
+
+  // MARKER EVENTS
+  marker.addEventListener('targetFound',()=>{ 
     scanningUI.classList.add("hidden");
     scanningUI.classList.remove("visible");
 
     if(pieces.length===0){
-      // Crea scritta "Solve the sliding puzzle" solo una volta
-      if(!document.getElementById('puzzleText')){
-        const puzzleText = document.createElement('a-text');
-        puzzleText.setAttribute('value','Solve the sliding puzzle');
-        puzzleText.setAttribute('align','center');
-        puzzleText.setAttribute('anchor','center');
-        puzzleText.setAttribute('color','#000000');
-        puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
-        puzzleText.setAttribute('scale','0.5 0.5 0.5');
-        puzzleText.setAttribute('id','puzzleText');
-        container.appendChild(puzzleText);
-      }
+      // Scritta "Solve the sliding puzzle" nera
+      const puzzleText = document.createElement('a-text');
+      puzzleText.setAttribute('value','Solve the sliding puzzle');
+      puzzleText.setAttribute('align','center');
+      puzzleText.setAttribute('anchor','center');
+      puzzleText.setAttribute('color','#000000'); // solo nero
+      puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
+      puzzleText.setAttribute('scale','0.5 0.5 0.5');
+      puzzleText.setAttribute('id','puzzleText');
+      container.appendChild(puzzleText);
 
       for(let r=0;r<rows;r++){
         for(let c=0;c<cols;c++){
