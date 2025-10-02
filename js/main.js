@@ -88,10 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if(solved){
       // Rimuove la scritta "Solve the sliding puzzle" (e l'eventuale bordo)
-      const puzzleText = document.getElementById('puzzleText');
-      if(puzzleText) puzzleText.parentNode.removeChild(puzzleText);
-      const puzzleBorder = document.getElementById('puzzleBorder');
-      if(puzzleBorder) puzzleBorder.parentNode.removeChild(puzzleBorder);
+      const puzzleGroup = document.getElementById('puzzleGroup');
+if (puzzleGroup) puzzleGroup.remove();
 
       // Rimuove pezzi e hole
       pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
@@ -284,25 +282,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(pieces.length===0){
       // Scritta "Solve the sliding puzzle" + bordo/ombra (id aggiunti per rimozione)
-      const puzzleBorder = document.createElement('a-text');
-      puzzleBorder.setAttribute('value','Solve the sliding puzzle');
-      puzzleBorder.setAttribute('align','center');
-      puzzleBorder.setAttribute('anchor','center');
-      puzzleBorder.setAttribute('color','#000000');
-      puzzleBorder.setAttribute('position',{x:0.01, y:0.6, z:0.49});
-      puzzleBorder.setAttribute('scale','0.6 0.6 0.6');
-      puzzleBorder.setAttribute('id','puzzleBorder');
-      container.appendChild(puzzleBorder);
+     // Gruppo "Solve the sliding puzzle" con bordo + testo
+const puzzleGroup = document.createElement('a-entity');
+puzzleGroup.setAttribute('id', 'puzzleGroup');
+puzzleGroup.setAttribute('position', { x: 0, y: 0.6, z: 0.5 });
+puzzleGroup.setAttribute('opacity', '1'); // appare subito
 
-      const puzzleText = document.createElement('a-text');
-      puzzleText.setAttribute('value','Solve the sliding puzzle');
-      puzzleText.setAttribute('align','center');
-      puzzleText.setAttribute('anchor','center');
-      puzzleText.setAttribute('color','#000000');
-      puzzleText.setAttribute('position',{x:0, y:0.65, z:0.5});
-      puzzleText.setAttribute('scale','0.4 0.4 0.4');
-      puzzleText.setAttribute('id','puzzleText');
-      container.appendChild(puzzleText);
+const puzzleBorder = document.createElement('a-text');
+puzzleBorder.setAttribute('value','Solve the sliding puzzle');
+puzzleBorder.setAttribute('align','center');
+puzzleBorder.setAttribute('anchor','center');
+puzzleBorder.setAttribute('color','#000000'); // bordo nero
+puzzleBorder.setAttribute('position',{x:0.01, y:0, z:0});
+puzzleBorder.setAttribute('scale','0.6 0.6 0.6');
+
+const puzzleText = document.createElement('a-text');
+puzzleText.setAttribute('value','Solve the sliding puzzle');
+puzzleText.setAttribute('align','center');
+puzzleText.setAttribute('anchor','center');
+puzzleText.setAttribute('color','#ffffff'); // testo bianco
+puzzleText.setAttribute('position',{x:0, y:0, z:0.01});
+puzzleText.setAttribute('scale','0.6 0.6 0.6');
+
+puzzleGroup.appendChild(puzzleBorder);
+puzzleGroup.appendChild(puzzleText);
+container.appendChild(puzzleGroup);
+
 
       // Crea pezzi del puzzle
       for(let r=0;r<rows;r++){
