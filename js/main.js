@@ -87,19 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     if(solved){
-     if(solved){
-  // Rimuove la scritta "Solve the sliding puzzle"
-  const puzzleText = document.getElementById('puzzleText');
-  if(puzzleText) puzzleText.parentNode.removeChild(puzzleText);
+      // Rimuove la scritta "Solve the sliding puzzle"
+      const puzzleText = document.getElementById('puzzleText');
+      if(puzzleText) puzzleText.parentNode.removeChild(puzzleText);
 
-  pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
-  const holeEl = document.getElementById("hole");
-  if(holeEl) holeEl.parentNode.removeChild(holeEl);
+      pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
+      const holeEl = document.getElementById("hole");
+      if(holeEl) holeEl.parentNode.removeChild(holeEl);
 
-  // codice scena finale...
-}
-
-
+      // Full image finale
       const fullImage = document.createElement("a-plane");
       fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
       fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
@@ -141,13 +137,15 @@ document.addEventListener("DOMContentLoaded", () => {
           cinemaModel.setAttribute('scale',{x:2,y:2,z:2});
           container.appendChild(cinemaModel);
 
-          // Testo 1960
+          // =====================
+          // Testo 1960 con bordo
+          // =====================
           const text1960 = document.createElement('a-text');
           text1960.setAttribute('value','1960');
           text1960.setAttribute('align','center');
           text1960.setAttribute('anchor','center');
           text1960.setAttribute('color','#000000');
-          text1960.setAttribute('font','roboto');
+          text1960.setAttribute('font','roboto-bold');
           text1960.setAttribute('position',{x:0,y:0.25,z:0.5});
           text1960.setAttribute('scale','0.5 0.5 0.5');
           text1960.setAttribute('opacity','0');
@@ -162,13 +160,23 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(text1960);
 
-          // Testo New facade
+          const border1960 = document.createElement('a-plane');
+          border1960.setAttribute('width', 0.7);
+          border1960.setAttribute('height', 0.2);
+          border1960.setAttribute('color','#ffffff');
+          border1960.setAttribute('position',{x:0, y:0.25, z:0.49});
+          container.appendChild(border1960);
+          text1960.setAttribute('position',{x:0,y:0.25,z:0.5});
+
+          // =====================
+          // Testo New facade con bordo
+          // =====================
           const textFacade = document.createElement('a-text');
           textFacade.setAttribute('value','New facade');
           textFacade.setAttribute('align','center');
           textFacade.setAttribute('anchor','center');
           textFacade.setAttribute('color','#000000');
-          textFacade.setAttribute('font','roboto');
+          textFacade.setAttribute('font','roboto-bold');
           textFacade.setAttribute('position',{x:0,y:0.15,z:0.5});
           textFacade.setAttribute('scale','0.35 0.35 0.35');
           textFacade.setAttribute('opacity','0');
@@ -183,8 +191,15 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
-          setTimeout(showOutro,10000);
+          const borderFacade = document.createElement('a-plane');
+          borderFacade.setAttribute('width', 0.55);
+          borderFacade.setAttribute('height', 0.15);
+          borderFacade.setAttribute('color','#ffffff');
+          borderFacade.setAttribute('position',{x:0, y:0.15, z:0.49});
+          container.appendChild(borderFacade);
+          textFacade.setAttribute('position',{x:0,y:0.15,z:0.5});
 
+          setTimeout(showOutro,10000); // durata finale scena
         },1000);
       },3000);
     }
@@ -208,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const img = document.createElement("img");
     img.src="images/outro2.png";
-    img.style.maxWidth="80%";
-    img.style.maxHeight="80%";
+    img.style.maxWidth="100%";
+    img.style.maxHeight="100%";
     outroOverlay.appendChild(img);
 
     document.body.appendChild(outroOverlay);
@@ -256,28 +271,27 @@ document.addEventListener("DOMContentLoaded", () => {
     scanningUI.classList.add("hidden");
     scanningUI.classList.remove("visible");
 
-   if(pieces.length===0){
-  // Crea scritta "Solve the sliding puzzle"
-  const puzzleText = document.createElement('a-text');
-  puzzleText.setAttribute('value','Solve the sliding puzzle');
-  puzzleText.setAttribute('align','center');
-  puzzleText.setAttribute('anchor','center');
-  puzzleText.setAttribute('color','#ffffff');
-  puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
-  puzzleText.setAttribute('scale','0.5 0.5 0.5');
-  puzzleText.setAttribute('id','puzzleText');
-  container.appendChild(puzzleText);
+    if(pieces.length===0){
+      // Crea scritta "Solve the sliding puzzle"
+      const puzzleText = document.createElement('a-text');
+      puzzleText.setAttribute('value','Solve the sliding puzzle');
+      puzzleText.setAttribute('align','center');
+      puzzleText.setAttribute('anchor','center');
+      puzzleText.setAttribute('color','#ffffff');
+      puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
+      puzzleText.setAttribute('scale','0.5 0.5 0.5');
+      puzzleText.setAttribute('id','puzzleText');
+      container.appendChild(puzzleText);
 
-  // Crea pezzi del puzzle
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      createPiece(r,c);
+      // Crea pezzi del puzzle
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          createPiece(r,c);
+        }
+      }
+      createEmptyHole();
+      shuffle(10);
     }
-  }
-  createEmptyHole();
-  shuffle(10);
-}
-
   });
 
   marker.addEventListener('targetLost',()=>{
