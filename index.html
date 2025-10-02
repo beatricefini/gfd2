@@ -4,82 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Puzzle Cinema</title>
-
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-
   <style>
-    :root { --instructions-scale: 100%; }
+    :root {
+      --instructions-scale: 100%;
+    }
 
     /* Overlay base */
     .overlay {
-      position: fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      background:black;
-      display:flex; justify-content:center; align-items:center;
-      flex-direction:column;
-      opacity:0;
-      transition: opacity 1s ease-in-out;
-      z-index:9999;
-    }
-    .overlay img { max-width: var(--instructions-scale); max-height: var(--instructions-scale); }
-
-    .overlay.show { opacity:1; }
-    .overlay.hide { opacity:0; }
-
-    /* Overlay 2: instructions */
-    #instructionsOverlay { position: relative; }
-
-    #tapText {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      color: black;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
       opacity: 0;
       transition: opacity 1s ease-in-out;
-      font-family: Roboto, sans-serif;
+      z-index: 9999;
+    }
+    .overlay img { 
+      max-width: var(--instructions-scale);
+      max-height: var(--instructions-scale);
+      width: auto;
+      height: auto;
+    }
+    .overlay.show { opacity: 1; }
+    .overlay.hide { opacity: 0; }
+
+    /* Testo Tap to Start */
+    #tapText {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: black;
+      opacity: 0;43
+      transition: opacity 1s ease-in-out;
+      font-family: Arial, sans-serif;
       cursor: pointer;
+      position: relative;
       z-index: 10;
     }
     #tapText.show { opacity: 1; }
 
-    /* Scanning UI */
+    /* Custom scanning UI */
     #custom-scanning-ui {
-      position: fixed; top: 0; left:0;
-      width:100vw; height:100vh;
-      pointer-events:none;
-      display:flex; justify-content:center; align-items:center;
-      z-index:998;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 998;
       transition: opacity 0.5s ease;
     }
-    #custom-scanning-ui.hidden { opacity:0; pointer-events:none; }
-    #custom-scanning-ui.visible { opacity:1; pointer-events:none; }
+    #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
+    #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
-    .corner { position:absolute; width:40px; height:40px; border:6px solid #fff; }
-    .top-left { top:10%; left:10%; border-right:none; border-bottom:none; }
-    .top-right { top:10%; right:10%; border-left:none; border-bottom:none; }
-    .bottom-left { bottom:10%; left:10%; border-right:none; border-top:none; }
-    .bottom-right { bottom:10%; right:10%; border-left:none; border-top:none; }
+    /* Angoli */
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 6px solid #ffffff;
+    }
+    .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
+    .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
+    .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
+    .bottom-right { bottom: 10%; right: 10%; border-left: none; border-top: none; }
 
+    /* Barra centrale animata */
     #custom-scanning-ui .scan-bar {
-      position:absolute; width:80%; height:6px; background:#fff;
-      top:10%;
+      position: absolute;
+      width: calc(80%);
+      height: 6px;
+      background: #ffffff;
+      top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
-    @keyframes moveBar { 0%{top:10%;} 100%{top:70%;} }
+    @keyframes moveBar {
+      0% { top: 10%; }
+      100% { top: 70%; }
+    }
 
-    a-scene { display:none; }
-    .a-enter-vr-button { display:none !important; }
-#instructionsOverlay {
-  opacity: 1;
-  transition: opacity 1s ease-in-out;
-}
+    /* Inizio scena nascosta */
+    a-scene { display: none; }
 
-#instructionsOverlay.hide {
-  opacity: 0;
-}
+    .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
@@ -90,12 +107,12 @@
   </div>
 
   <!-- Overlay 2 -->
-  <div id="instructionsOverlay" class="overlay">
+  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
 
-  <!-- Custom scanning UI -->
+  <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
@@ -136,35 +153,34 @@
       const tapText = document.getElementById("tapText");
       const sceneEl = document.querySelector("a-scene");
 
-      // Mostra overlay 1
-      setTimeout(()=>intro.classList.add("show"), 100);
-
-      setTimeout(()=>{
+      // Overlay 1
+      setTimeout(() => intro.classList.add("show"), 100);
+      setTimeout(() => {
         intro.classList.remove("show");
         intro.classList.add("hide");
-        setTimeout(()=>intro.remove(), 1000);
+        setTimeout(() => {
+          intro.remove();
 
-        // Mostra overlay 2
-        instructions.style.opacity=1;
-        setTimeout(()=>instructions.classList.add("show"), 100);
+          // Overlay 2
+          instructions.style.opacity = 1;
+          setTimeout(() => instructions.classList.add("show"), 100);
+          setTimeout(() => tapText.classList.add("show"), 3000);
 
-        // Mostra "Tap to start" dopo 3s
-        setTimeout(()=>tapText.classList.add("show"), 3000);
+          // Tap anywhere to start
+          document.body.addEventListener("click", async () => {
+            instructions.classList.add("hide");
+            setTimeout(() => instructions.remove(), 1000);
 
-        instructions.addEventListener("click", async ()=>{
-  instructions.classList.remove("show");
-  instructions.classList.add("hide");
-  setTimeout(()=>instructions.remove(),1000);
+            sceneEl.style.display = "flex";
 
-  sceneEl.style.display="flex";
-  const mindarSystem = sceneEl.systems["mindar-image-system"];
-  await mindarSystem.start();
+            const mindarSystem = sceneEl.systems["mindar-image-system"];
+            await mindarSystem.start();
 
-  const vrButton = document.querySelector(".a-enter-vr-button");
-  if(vrButton) vrButton.remove();
-}, {once:true});
+            const vrButton = document.querySelector(".a-enter-vr-button");
+            if(vrButton) vrButton.remove();
+          }, { once: true });
 
-
+        }, 1000);
       }, 5000);
     });
   </script>
