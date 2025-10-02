@@ -72,6 +72,14 @@
 
     a-scene { display:none; }
     .a-enter-vr-button { display:none !important; }
+#instructionsOverlay {
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
+}
+
+#instructionsOverlay.hide {
+  opacity: 0;
+}
   </style>
 </head>
 <body>
