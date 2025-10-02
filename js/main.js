@@ -238,8 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
       puzzleText.setAttribute('align','center');
       puzzleText.setAttribute('anchor','center');
       puzzleText.setAttribute('color','#000000');
-      puzzleText.setAttribute('position',{x:0,y:0.5,z:0.5});
-      puzzleText.setAttribute('scale','0.2 0.2 0.2');
+      puzzleText.setAttribute('position',{x:0,y:0.65,z:0.5});
+      puzzleText.setAttribute('scale','0.3 0.3 0.3');
       puzzleText.setAttribute('id','puzzleText');
       container.appendChild(puzzleText);
 
