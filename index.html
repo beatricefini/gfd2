@@ -23,7 +23,7 @@
       align-items: center;
       flex-direction: column;
       opacity: 0;
-      transition: opacity 0.1s ease-in-out; /* fade velocissimo */
+      transition: opacity 1s ease-in-out; /* FADE NORMALE */
       z-index: 9999;
     }
     .overlay img { 
@@ -84,7 +84,7 @@
     }
     @keyframes moveBar { 0% { top: 10%; } 100% { top: 70%; } }
 
-    /* Testo sopra puzzle */
+    /* Testo puzzle */
     #puzzleTitle {
       position: absolute;
       top: 5%;
@@ -178,13 +178,13 @@
 
           // Overlay 2
           instructions.style.opacity = 1;
-          setTimeout(() => instructions.classList.add("show"), 50); 
-          setTimeout(() => tapText.classList.add("show"), 300);    
+          setTimeout(() => instructions.classList.add("show"), 100); 
+          setTimeout(() => tapText.classList.add("show"), 3000); // tap appare dopo 3s
 
           instructions.addEventListener("click", async () => {
             instructions.classList.remove("show");
             instructions.classList.add("hide");
-            setTimeout(() => instructions.remove(), 100);
+            setTimeout(() => instructions.remove(), 1000);
 
             sceneEl.style.display = "flex";
 
@@ -206,8 +206,8 @@
             const vrButton = document.querySelector(".a-enter-vr-button");
             if(vrButton) vrButton.remove();
           }, { once: true });
-        }, 50);
-      }, 5000);
+        }, 1000); // fade normale
+      }, 5000); // primo overlay visibile 5s
     });
   </script>
 </body>
