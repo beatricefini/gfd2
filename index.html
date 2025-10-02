@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Puzzle Cinema</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
     :root {
-      /* Imposta qui la scala dell'immagine instructions da 0% a 100% */
       --instructions-scale: 100%;
     }
 
@@ -25,7 +25,7 @@
       align-items: center;
       flex-direction: column;
       opacity: 0;
-      transition: opacity 1s ease-in-out;
+      transition: opacity 0.1s ease-in-out; /* fade velocissimo */
       z-index: 9999;
     }
     .overlay img { 
@@ -37,15 +37,17 @@
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
-    /* Testo Tap to Start */
+    /* Tap to Start */
     #tapText {
       margin-top: 20px;
-      font-size: 2rem;
-      color: white;
+      font-size: 1.2rem;      
+      color: black;             
       opacity: 0;
       transition: opacity 1s ease-in-out;
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', sans-serif; 
       cursor: pointer;
+      position: relative;
+      top: -20px;               
     }
     #tapText.show { opacity: 1; }
 
@@ -66,7 +68,7 @@
     #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
     #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
-    /* Angoli */
+    /* Angoli scanner */
     .corner {
       position: absolute;
       width: 40px;
@@ -92,10 +94,22 @@
       100% { top: 70%; }
     }
 
+    /* Testo sopra puzzle: stessa dimensione e font di Tap to Start */
+    #puzzleTitle {
+      position: absolute;
+      top: 5%;
+      width: 100%;
+      text-align: center;
+      font-family: 'Roboto', sans-serif;
+      font-size: 1.2rem;  
+      color: black;        
+      z-index: 10000;
+    }
+
     /* Inizio scena nascosta */
     a-scene { display: none; }
 
-    /* Nascondi pulsante VR di A-Frame */
+    /* Nascondi pulsante VR */
     .a-enter-vr-button { display: none !important; }
   </style>
 </head>
@@ -111,6 +125,9 @@
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
+
+  <!-- Testo puzzle -->
+  <div id="puzzleTitle">Solve the sliding puzzle</div>
 
   <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
@@ -145,13 +162,13 @@
   </a-scene>
 
   <script src="js/main.js"></script>
-
   <script>
     window.addEventListener("load", () => {
       const intro = document.getElementById("introOverlay");
       const instructions = document.getElementById("instructionsOverlay");
       const tapText = document.getElementById("tapText");
       const sceneEl = document.querySelector("a-scene");
+      const scanningUI = document.getElementById("custom-scanning-ui");
 
       // Overlay 1
       setTimeout(() => intro.classList.add("show"), 100);
@@ -163,28 +180,37 @@
 
           // Overlay 2
           instructions.style.opacity = 1;
-          setTimeout(() => instructions.classList.add("show"), 100);
-          setTimeout(() => tapText.classList.add("show"), 3000);
+          setTimeout(() => instructions.classList.add("show"), 50); 
+          setTimeout(() => tapText.classList.add("show"), 300);    
 
           instructions.addEventListener("click", async () => {
             instructions.classList.remove("show");
             instructions.classList.add("hide");
-            setTimeout(() => instructions.remove(), 1000);
+            setTimeout(() => instructions.remove(), 100);
 
             sceneEl.style.display = "flex";
 
             const mindarSystem = sceneEl.systems["mindar-image-system"];
             await mindarSystem.start();
 
+            // Scanner visibile solo quando target perso
+            const marker = document.getElementById("marker");
+            marker.addEventListener("targetFound", () => {
+              scanningUI.classList.remove("visible");
+              scanningUI.classList.add("hidden");
+            });
+            marker.addEventListener("targetLost", () => {
+              scanningUI.classList.remove("hidden");
+              scanningUI.classList.add("visible");
+            });
+
             // Rimuove pulsante VR
             const vrButton = document.querySelector(".a-enter-vr-button");
             if(vrButton) vrButton.remove();
           }, { once: true });
-
-        }, 1000);
+        }, 50);
       }, 5000);
     });
   </script>
-
 </body>
 </html>
