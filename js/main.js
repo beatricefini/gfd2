@@ -138,66 +138,79 @@ document.addEventListener("DOMContentLoaded", () => {
           container.appendChild(cinemaModel);
 
           // =====================
-          // Testo 1960 con bordo
-          // =====================
-          const text1960 = document.createElement('a-text');
-          text1960.setAttribute('value','1960');
-          text1960.setAttribute('align','center');
-          text1960.setAttribute('anchor','center');
-          text1960.setAttribute('color','#000000');
-          text1960.setAttribute('font','roboto-bold');
-          text1960.setAttribute('position',{x:0,y:0.25,z:0.5});
-          text1960.setAttribute('scale','0.5 0.5 0.5');
-          text1960.setAttribute('opacity','0');
-          text1960.setAttribute('shader','msdf');
-          text1960.setAttribute('animation__fadein',{
-            property:'opacity',
-            from:0,
-            to:1,
-            dur:800,
-            easing:'easeInQuad',
-            delay:200
-          });
-          container.appendChild(text1960);
+// Testo "1960" con bordo
+// =====================
+const text1960 = document.createElement('a-text');
+text1960.setAttribute('value', '1960');
+text1960.setAttribute('align', 'center');
+text1960.setAttribute('anchor', 'center');
+text1960.setAttribute('color', '#000000');
+text1960.setAttribute('font', 'roboto');
+text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z:0.5 });
+text1960.setAttribute('scale', '0.5 0.5 0.5');
+text1960.setAttribute('opacity', '0');
+text1960.setAttribute('shader', 'msdf');
+text1960.setAttribute('negate', 'false');
+text1960.setAttribute('animation__fadein', {
+  property: 'opacity',
+  from: 0,
+  to: 1,
+  dur: 800,
+  easing: 'easeInQuad',
+  delay: 200
+});
+container.appendChild(text1960);
 
-          const border1960 = document.createElement('a-plane');
-          border1960.setAttribute('width', 0.7);
-          border1960.setAttribute('height', 0.2);
-          border1960.setAttribute('color','#ffffff');
-          border1960.setAttribute('position',{x:0, y:0.25, z:0.49});
-          container.appendChild(border1960);
-          text1960.setAttribute('position',{x:0,y:0.25,z:0.5});
+// Outline sottile (bordo nero)
+const border1960 = document.createElement('a-text');
+border1960.setAttribute('value', '1960');
+border1960.setAttribute('align', 'center');
+border1960.setAttribute('anchor', 'center');
+border1960.setAttribute('color', '#000000'); // bordo nero
+border1960.setAttribute('font', 'roboto');
+border1960.setAttribute('position', { x:0.005, y: baseHeight+0.5, z:0.49 });
+border1960.setAttribute('scale', '0.5 0.5 0.5');
+border1960.setAttribute('opacity', '1');
+border1960.setAttribute('shader', 'msdf');
+container.appendChild(border1960);
 
-          // =====================
-          // Testo New facade con bordo
-          // =====================
-          const textFacade = document.createElement('a-text');
-          textFacade.setAttribute('value','New facade');
-          textFacade.setAttribute('align','center');
-          textFacade.setAttribute('anchor','center');
-          textFacade.setAttribute('color','#000000');
-          textFacade.setAttribute('font','roboto-bold');
-          textFacade.setAttribute('position',{x:0,y:0.15,z:0.5});
-          textFacade.setAttribute('scale','0.35 0.35 0.35');
-          textFacade.setAttribute('opacity','0');
-          textFacade.setAttribute('shader','msdf');
-          textFacade.setAttribute('animation__fadein',{
-            property:'opacity',
-            from:0,
-            to:1,
-            dur:800,
-            easing:'easeInQuad',
-            delay:1200
-          });
-          container.appendChild(textFacade);
+// =====================
+// Testo "New facade" con bordo
+// =====================
+const textFacade = document.createElement('a-text');
+textFacade.setAttribute('value', 'New facade');
+textFacade.setAttribute('align', 'center');
+textFacade.setAttribute('anchor', 'center');
+textFacade.setAttribute('color', '#000000');
+textFacade.setAttribute('font', 'roboto');
+textFacade.setAttribute('position', { x:0, y: baseHeight+0.4, z:0.5 });
+textFacade.setAttribute('scale', '0.35 0.35 0.35');
+textFacade.setAttribute('opacity', '0');
+textFacade.setAttribute('shader', 'msdf');
+textFacade.setAttribute('negate', 'false');
+textFacade.setAttribute('animation__fadein', {
+  property: 'opacity',
+  from: 0,
+  to: 1,
+  dur: 800,
+  easing: 'easeInQuad',
+  delay: 1200
+});
+container.appendChild(textFacade);
 
-          const borderFacade = document.createElement('a-plane');
-          borderFacade.setAttribute('width', 0.55);
-          borderFacade.setAttribute('height', 0.15);
-          borderFacade.setAttribute('color','#ffffff');
-          borderFacade.setAttribute('position',{x:0, y:0.15, z:0.49});
-          container.appendChild(borderFacade);
-          textFacade.setAttribute('position',{x:0,y:0.15,z:0.5});
+// Outline sottile (bordo nero)
+const borderFacade = document.createElement('a-text');
+borderFacade.setAttribute('value', 'New facade');
+borderFacade.setAttribute('align', 'center');
+borderFacade.setAttribute('anchor', 'center');
+borderFacade.setAttribute('color', '#000000'); // bordo nero
+borderFacade.setAttribute('font', 'roboto');
+borderFacade.setAttribute('position', { x:0.005, y: baseHeight+0.4, z:0.49 });
+borderFacade.setAttribute('scale', '0.35 0.35 0.35');
+borderFacade.setAttribute('opacity', '1');
+borderFacade.setAttribute('shader', 'msdf');
+container.appendChild(borderFacade);
+
 
           setTimeout(showOutro,10000); // durata finale scena
         },1000);
