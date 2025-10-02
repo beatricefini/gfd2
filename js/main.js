@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
-      // Animazione float
+      // Float animation
       fullImage.setAttribute("animation__float", {
         property: "position",
         dir: "alternate",
@@ -136,14 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
             easing: "easeInOutQuad"
           });
 
-          // Modello Cinema
+          // --- Modello Cinema ---
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model', '#cinemaModel');
           cinemaModel.setAttribute('position', { x: 0.1, y: -0.4, z: 0.5 });
           cinemaModel.setAttribute('scale', { x: 2, y: 2, z: 2 });
           container.appendChild(cinemaModel);
 
-          // Testo 1960
+          // --- Testo 1960 ---
           const text1960 = document.createElement('a-text');
           text1960.setAttribute('value', '1960');
           text1960.setAttribute('align', 'center');
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(text1960);
 
-          // Testo New facade
+          // --- Testo New facade ---
           const textFacade = document.createElement('a-text');
           textFacade.setAttribute('value', 'New facade');
           textFacade.setAttribute('align', 'center');
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
-          // Dopo 5 secondi mostra overlay outro
+          // --- Mostra overlay outro dopo 5 secondi ---
           setTimeout(() => {
             outro.style.display = "flex";
             setTimeout(() => outro.classList.add("show"), 100);
@@ -238,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Inizializzazione puzzle al targetFound
   marker.addEventListener('targetFound', () => {
+    scanningUI.classList.add("hidden"); // nasconde scanner quando target trovato
     if(pieces.length===0){
       for(let r=0;r<rows;r++){
         for(let c=0;c<cols;c++){
@@ -252,5 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  marker.addEventListener('targetLost', () => {
+    scanningUI.classList.remove("hidden"); // mostra scanner se target perso
+  });
 });
-

@@ -28,9 +28,8 @@
       max-height: 80%;
     }
     .overlay.show { opacity: 1; }
-    .overlay.hide { opacity: 0; }
 
-    /* Testo Tap to Start */
+    /* Tap to start */
     #tapText {
       margin-top: 20px;
       font-size: 2rem;
@@ -59,7 +58,6 @@
     #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
     #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
-    /* Angoli */
     .corner {
       position: absolute;
       width: 40px;
@@ -71,7 +69,6 @@
     .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
     .bottom-right { bottom: 10%; right: 10%; border-left: none; border-top: none; }
 
-    /* Barra centrale animata */
     #custom-scanning-ui .scan-bar {
       position: absolute;
       width: calc(80%);
@@ -86,34 +83,30 @@
       100% { top: 70%; }
     }
 
-    /* Inizio scena nascosta */
     a-scene { display: none; }
 
-    /* Nascondi definitivamente il pulsante VR di A-Frame */
-    .a-enter-vr-button {
-      display: none !important;
-    }
+    /* Nascondi pulsante VR */
+    .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- Overlay 1: count2.png -->
+  <!-- Overlay iniziale -->
   <div id="introOverlay" class="overlay">
     <img src="images/count2.png" alt="Intro">
   </div>
 
-  <!-- Overlay 2: instructions.png -->
   <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
 
-  <!-- Overlay finale: outro2.png -->
-  <div id="outroOverlay" class="overlay" style="display: flex; opacity: 0;">
+  <!-- Overlay finale -->
+  <div id="outroOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/outro2.png" alt="Outro">
   </div>
 
-  <!-- Custom MindAR scanning UI -->
+  <!-- Scanner -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
