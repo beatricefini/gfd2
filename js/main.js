@@ -237,9 +237,9 @@ document.addEventListener("DOMContentLoaded", () => {
       puzzleText.setAttribute('value','Solve the sliding puzzle');
       puzzleText.setAttribute('align','center');
       puzzleText.setAttribute('anchor','center');
-      puzzleText.setAttribute('color','#ffffff');
+      puzzleText.setAttribute('color','#000000');
       puzzleText.setAttribute('position',{x:0,y:0.5,z:0.5});
-      puzzleText.setAttribute('scale','0.5 0.5 0.5');
+      puzzleText.setAttribute('scale','0.2 0.2 0.2');
       puzzleText.setAttribute('id','puzzleText');
       container.appendChild(puzzleText);
 

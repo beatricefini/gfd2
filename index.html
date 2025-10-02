@@ -143,19 +143,19 @@
         // Mostra "Tap to start" dopo 3s
         setTimeout(()=>tapText.classList.add("show"), 3000);
 
-        tapText.addEventListener("click", async ()=>{
-          instructions.classList.remove("show");
-          instructions.classList.add("hide");
-          setTimeout(()=>instructions.remove(),1000);
+        instructions.addEventListener("click", async ()=>{
+  instructions.classList.remove("show");
+  instructions.classList.add("hide");
+  setTimeout(()=>instructions.remove(),1000);
 
-          sceneEl.style.display="flex";
-          const mindarSystem = sceneEl.systems["mindar-image-system"];
-          await mindarSystem.start();
+  sceneEl.style.display="flex";
+  const mindarSystem = sceneEl.systems["mindar-image-system"];
+  await mindarSystem.start();
 
-          // Rimuove pulsante VR
-          const vrButton = document.querySelector(".a-enter-vr-button");
-          if(vrButton) vrButton.remove();
-        }, {once:true});
+  const vrButton = document.querySelector(".a-enter-vr-button");
+  if(vrButton) vrButton.remove();
+}, {once:true});
+
 
       }, 5000);
     });
