@@ -8,9 +8,7 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    :root {
-      --instructions-scale: 100%;
-    }
+    :root { --instructions-scale: 100%; }
 
     /* Overlay base */
     .overlay {
@@ -47,7 +45,7 @@
       font-family: 'Roboto', sans-serif; 
       cursor: pointer;
       position: relative;
-      top: -20px;               
+      top: -50px; /* più in alto verso lo spettatore */
     }
     #tapText.show { opacity: 1; }
 
@@ -69,12 +67,7 @@
     #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
     /* Angoli scanner */
-    .corner {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 6px solid #ffffff;
-    }
+    .corner { position: absolute; width: 40px; height: 40px; border: 6px solid #ffffff; }
     .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
     .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
     .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
@@ -89,21 +82,20 @@
       top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
-    @keyframes moveBar {
-      0% { top: 10%; }
-      100% { top: 70%; }
-    }
+    @keyframes moveBar { 0% { top: 10%; } 100% { top: 70%; } }
 
-    /* Testo sopra puzzle: stessa dimensione e font di Tap to Start */
+    /* Testo sopra puzzle */
     #puzzleTitle {
       position: absolute;
       top: 5%;
       width: 100%;
       text-align: center;
       font-family: 'Roboto', sans-serif;
-      font-size: 1.2rem;  
-      color: black;        
+      font-size: 1.2rem;
+      color: black;
       z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
     }
 
     /* Inizio scena nascosta */
@@ -124,6 +116,11 @@
   <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
+  </div>
+
+  <!-- Overlay Outro -->
+  <div id="outroOverlay" class="overlay">
+    <img src="images/outro2.png" alt="Outro">
   </div>
 
   <!-- Testo puzzle -->
@@ -167,6 +164,7 @@
       const intro = document.getElementById("introOverlay");
       const instructions = document.getElementById("instructionsOverlay");
       const tapText = document.getElementById("tapText");
+      const outro = document.getElementById("outroOverlay");
       const sceneEl = document.querySelector("a-scene");
       const scanningUI = document.getElementById("custom-scanning-ui");
 

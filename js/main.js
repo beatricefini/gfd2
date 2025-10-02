@@ -2,13 +2,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const container = document.getElementById("piecesContainer");
   const cameraEl = document.querySelector("a-camera");
+  const puzzleTitle = document.getElementById("puzzleTitle");
+  const outro = document.getElementById("outroOverlay");
+
   const rows = 3;
   const cols = 3;
   const pieceSize = 0.3;
   const pieceGap = 0.01;
-  const grid = [];
+
+  const grid = {};
   const pieces = [];
-  let emptyPos = { row: 2, col: 0 }; // buco in basso a sinistra
+  let emptyPos = { row: 2, col: 0 };
 
   function getWorldPos(row, col) {
     const x = (col - (cols - 1) / 2) * (pieceSize + pieceGap);
@@ -52,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = parseInt(piece.dataset.row);
     const c = parseInt(piece.dataset.col);
     if (!isAdjacent(r, c, emptyPos.row, emptyPos.col)) return;
+
     grid[`${r},${c}`] = null;
     piece.dataset.row = emptyPos.row;
     piece.dataset.col = emptyPos.col;
@@ -63,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const duration = 250;
     const startTime = performance.now();
     function easeOutQuad(t) { return t*(2-t); }
+
     function animate() {
       const elapsed = performance.now() - startTime;
       const t = Math.min(elapsed / duration, 1);
@@ -87,7 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       }
     }
+
     if (solved) {
+      puzzleTitle.style.opacity = 0; // nasconde il titolo del puzzle
       pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
       const holeEl = document.getElementById("hole");
       if (holeEl) holeEl.parentNode.removeChild(holeEl);
@@ -108,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
-      // Dopo 10 secondi mostra modello e testi
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
@@ -127,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
             easing: "easeInOutQuad"
           });
 
-          // Modello cinema e testi
+          // --- Modello Cinema ---
           const baseHeight = -0.25;
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model', '#cinemaModel');
@@ -135,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
           cinemaModel.setAttribute('scale', { x: 2, y: 2, z: 2 });
           container.appendChild(cinemaModel);
 
+          // --- Testi ---
           const text1960 = document.createElement('a-text');
           text1960.setAttribute('value', '1960');
           text1960.setAttribute('align', 'center');
@@ -177,8 +185,14 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
+          // --- Outro dopo 10 secondi ---
+          setTimeout(() => {
+            outro.style.display = "flex";
+            setTimeout(() => outro.classList.add("show"), 100);
+          }, 10000);
+
         }, 1000);
-      }, 10000); // 10 secondi
+      }, 10000); // mantiene scena finale 10 secondi
     }
   }
 
@@ -231,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       createEmptyHole();
       shuffle(10);
+      puzzleTitle.style.opacity = 1; // mostra titolo puzzle
     } else {
       const holeEl = document.getElementById("hole");
       if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
