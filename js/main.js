@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("piecesContainer");
   const cameraEl = document.querySelector("a-camera");
   const scanningUI = document.getElementById("custom-scanning-ui");
-  const outro = document.getElementById("outroOverlay");
 
   const rows = 3;
   const cols = 3;
@@ -107,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
       fullImage.setAttribute("position", { x: 0, y: 0, z: 0.02 });
       container.appendChild(fullImage);
 
-      // Float animation
       fullImage.setAttribute("animation__float", {
         property: "position",
         dir: "alternate",
@@ -117,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
         to: `0 0.2 0.02`
       });
 
-      // Animazioni modello cinema e testi
       setTimeout(() => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation", { x:0, y:0, z:0 });
@@ -136,14 +133,14 @@ document.addEventListener("DOMContentLoaded", () => {
             easing: "easeInOutQuad"
           });
 
-          // --- Modello Cinema ---
+          // Modello cinema
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model', '#cinemaModel');
           cinemaModel.setAttribute('position', { x: 0.1, y: -0.4, z: 0.5 });
           cinemaModel.setAttribute('scale', { x: 2, y: 2, z: 2 });
           container.appendChild(cinemaModel);
 
-          // --- Testo 1960 ---
+          // Testo 1960
           const text1960 = document.createElement('a-text');
           text1960.setAttribute('value', '1960');
           text1960.setAttribute('align', 'center');
@@ -164,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(text1960);
 
-          // --- Testo New facade ---
+          // Testo New facade
           const textFacade = document.createElement('a-text');
           textFacade.setAttribute('value', 'New facade');
           textFacade.setAttribute('align', 'center');
@@ -185,18 +182,12 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
-          // --- Mostra overlay outro dopo 5 secondi ---
-          setTimeout(() => {
-            outro.style.display = "flex";
-            setTimeout(() => outro.classList.add("show"), 100);
-          }, 5000);
-
         }, 1000);
       }, 3000);
     }
   }
 
-  // Raycaster e gestione touch/click
+  // Raycaster
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   function updateMouse(event) {
@@ -257,3 +248,4 @@ document.addEventListener("DOMContentLoaded", () => {
     scanningUI.classList.remove("hidden"); // mostra scanner se target perso
   });
 });
+

@@ -28,8 +28,9 @@
       max-height: 80%;
     }
     .overlay.show { opacity: 1; }
+    .overlay.hide { opacity: 0; }
 
-    /* Tap to start */
+    /* Testo Tap to Start */
     #tapText {
       margin-top: 20px;
       font-size: 2rem;
@@ -58,6 +59,7 @@
     #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
     #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
+    /* Angoli */
     .corner {
       position: absolute;
       width: 40px;
@@ -69,6 +71,7 @@
     .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
     .bottom-right { bottom: 10%; right: 10%; border-left: none; border-top: none; }
 
+    /* Barra centrale animata */
     #custom-scanning-ui .scan-bar {
       position: absolute;
       width: calc(80%);
@@ -83,30 +86,29 @@
       100% { top: 70%; }
     }
 
+    /* Inizio scena nascosta */
     a-scene { display: none; }
 
-    /* Nascondi pulsante VR */
-    .a-enter-vr-button { display: none !important; }
+    /* Nascondi definitivamente il pulsante VR di A-Frame */
+    .a-enter-vr-button {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Overlay iniziale -->
+  <!-- Overlay 1: count2.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count2.png" alt="Intro">
   </div>
 
+  <!-- Overlay 2: instructions.png -->
   <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
 
-  <!-- Overlay finale -->
-  <div id="outroOverlay" class="overlay" style="display:flex; opacity:0;">
-    <img src="images/outro2.png" alt="Outro">
-  </div>
-
-  <!-- Scanner -->
+  <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
@@ -139,5 +141,65 @@
   </a-scene>
 
   <script src="js/main.js"></script>
+
+  <!-- Script overlay e avvio MindAR -->
+  <script>
+    window.addEventListener("load", () => {
+      const intro = document.getElementById("introOverlay");
+      const instructions = document.getElementById("instructionsOverlay");
+      const tapText = document.getElementById("tapText");
+      const sceneEl = document.querySelector("a-scene");
+      const scanningUI = document.getElementById("custom-scanning-ui");
+
+      // Overlay 1 (count2.png)
+      setTimeout(() => intro.classList.add("show"), 100);
+      setTimeout(() => {
+        intro.classList.remove("show");
+        intro.classList.add("hide");
+        setTimeout(() => {
+          intro.remove();
+
+          // Mostra overlay 2
+          instructions.style.opacity = 1;
+          setTimeout(() => instructions.classList.add("show"), 100);
+
+          // Dopo 3s appare "Tap to start"
+          setTimeout(() => tapText.classList.add("show"), 3000);
+
+          // Al click l'utente fa partire l'esperienza
+          instructions.addEventListener("click", async () => {
+            instructions.classList.remove("show");
+            instructions.classList.add("hide");
+            setTimeout(() => instructions.remove(), 1000);
+
+            // Mostra la scena AR
+            sceneEl.style.display = "flex";
+
+            // Avvia MindAR manualmente
+            const mindarSystem = sceneEl.systems["mindar-image-system"];
+            await mindarSystem.start();
+
+            // Rimuove pulsante VR se ancora presente
+            const vrButton = document.querySelector(".a-enter-vr-button");
+            if(vrButton) vrButton.remove();
+
+            // Gestione visibilità scanner
+            const marker = document.getElementById("marker");
+            marker.addEventListener("targetFound", () => {
+              scanningUI.classList.remove("visible");
+              scanningUI.classList.add("hidden");
+            });
+            marker.addEventListener("targetLost", () => {
+              scanningUI.classList.remove("hidden");
+              scanningUI.classList.add("visible");
+            });
+
+          }, { once: true });
+
+        }, 1000);
+      }, 5000);
+    });
+  </script>
+
 </body>
 </html>
