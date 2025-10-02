@@ -7,8 +7,8 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    /* Overlay iniziale */
-    #introOverlay {
+    /* Overlay base */
+    .overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -18,26 +18,46 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       z-index: 9999;
     }
-    #introOverlay img {
+    .overlay img {
       max-width: 80%;
       max-height: 80%;
     }
-    #introOverlay.show {
+    .overlay.show {
       opacity: 1;
     }
-    #introOverlay.hide {
+    .overlay.hide {
       opacity: 0;
+    }
+
+    /* Testo Tap to Start */
+    #tapText {
+      margin-top: 20px;
+      font-size: 2rem;
+      color: white;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      font-family: Arial, sans-serif;
+    }
+    #tapText.show {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <!-- Overlay immagine iniziale -->
-  <div id="introOverlay">
+  <!-- Overlay 1: count2.png -->
+  <div id="introOverlay" class="overlay">
     <img src="images/count2.png" alt="Intro">
+  </div>
+
+  <!-- Overlay 2: instructions.png -->
+  <div id="instructionsOverlay" class="overlay" style="display:none;">
+    <img src="images/instructions.png" alt="Instructions">
+    <div id="tapText">Tap to start</div>
   </div>
 
   <!-- Scena AR -->
@@ -68,16 +88,33 @@
   <!-- Script overlay -->
   <script>
     window.addEventListener("load", () => {
-      const overlay = document.getElementById("introOverlay");
-      // Fade in
-      setTimeout(() => overlay.classList.add("show"), 100);
-      // Attendi 3 secondi, poi fade out
+      const intro = document.getElementById("introOverlay");
+      const instructions = document.getElementById("instructionsOverlay");
+      const tapText = document.getElementById("tapText");
+
+      // Overlay 1 (count2.png)
+      setTimeout(() => intro.classList.add("show"), 100);
       setTimeout(() => {
-        overlay.classList.remove("show");
-        overlay.classList.add("hide");
-        // Rimuovi l’overlay dopo l’animazione
-        setTimeout(() => overlay.remove(), 1000);
-      }, 4000); // 1s fadein + 3s visibile
+        intro.classList.remove("show");
+        intro.classList.add("hide");
+        setTimeout(() => {
+          intro.remove();
+          // Mostra overlay 2
+          instructions.style.display = "flex";
+          setTimeout(() => instructions.classList.add("show"), 100);
+
+          // Dopo 3s appare "Tap to start"
+          setTimeout(() => tapText.classList.add("show"), 3000);
+
+          // Al click l'utente fa partire l'esperienza
+          instructions.addEventListener("click", () => {
+            instructions.classList.remove("show");
+            instructions.classList.add("hide");
+            setTimeout(() => instructions.remove(), 1000);
+          }, { once: true });
+
+        }, 1000); // tempo per fadeout
+      }, 5000); // 1s fadein + 4s visibile
     });
   </script>
 </body>
