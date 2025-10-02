@@ -42,27 +42,80 @@
       opacity: 0;
       transition: opacity 1s ease-in-out;
       font-family: Arial, sans-serif;
+      cursor: pointer;
     }
     #tapText.show {
       opacity: 1;
     }
+
+    /* MindAR custom scanning UI */
+    #custom-scanning-ui {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 998;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    .rect-scanner {
+      width: 80vw;      /* larghezza rettangolo */
+      height: 40vh;     /* altezza rettangolo */
+      border: 4px solid #00ff00;
+      box-sizing: border-box;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .scanning-text {
+      margin-top: 20px;
+      color: white;
+      font-size: 1.5rem;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #custom-scanning-ui.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Inizio scena nascosta */
+    a-scene {
+      display: none;
+    }
   </style>
 </head>
 <body>
+
   <!-- Overlay 1: count2.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count2.png" alt="Intro">
   </div>
 
   <!-- Overlay 2: instructions.png -->
-  <div id="instructionsOverlay" class="overlay" style="display:none;">
+  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
 
+  <!-- Custom MindAR scanning UI -->
+  <div id="custom-scanning-ui" class="hidden">
+    <div class="rect-scanner"></div>
+    <div class="scanning-text">Scanning environment...</div>
+  </div>
+
   <!-- Scena AR -->
-  <a-scene
-    mindar-image="imageTargetSrc: targets/target.mind"
+  <a-scene 
+    mindar-image="imageTargetSrc: targets/target.mind; uiScanning:#custom-scanning-ui"
     color-space="sRGB"
     renderer="colorManagement: true"
     vr-mode-ui="enabled: false"
@@ -85,12 +138,13 @@
 
   <script src="js/main.js"></script>
 
-  <!-- Script overlay -->
+  <!-- Script overlay e avvio MindAR -->
   <script>
     window.addEventListener("load", () => {
       const intro = document.getElementById("introOverlay");
       const instructions = document.getElementById("instructionsOverlay");
       const tapText = document.getElementById("tapText");
+      const sceneEl = document.querySelector("a-scene");
 
       // Overlay 1 (count2.png)
       setTimeout(() => intro.classList.add("show"), 100);
@@ -99,23 +153,32 @@
         intro.classList.add("hide");
         setTimeout(() => {
           intro.remove();
+
           // Mostra overlay 2
-          instructions.style.display = "flex";
+          instructions.style.opacity = 1;
           setTimeout(() => instructions.classList.add("show"), 100);
 
           // Dopo 3s appare "Tap to start"
           setTimeout(() => tapText.classList.add("show"), 3000);
 
           // Al click l'utente fa partire l'esperienza
-          instructions.addEventListener("click", () => {
+          instructions.addEventListener("click", async () => {
             instructions.classList.remove("show");
             instructions.classList.add("hide");
             setTimeout(() => instructions.remove(), 1000);
+
+            // Mostra la scena AR
+            sceneEl.style.display = "flex";
+
+            // Avvia MindAR manualmente
+            const mindarSystem = sceneEl.systems["mindar-image-system"];
+            await mindarSystem.start(); // avvia camera e scanning
           }, { once: true });
 
-        }, 1000); // tempo per fadeout
+        }, 1000); // fadeout intro
       }, 5000); // 1s fadein + 4s visibile
     });
   </script>
+
 </body>
 </html>
