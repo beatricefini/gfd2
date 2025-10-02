@@ -27,7 +27,7 @@
       transition: opacity 1s ease-in-out;
       z-index: 9999;
     }
-    .overlay img { 
+    .overlay img {
       max-width: var(--instructions-scale);
       max-height: var(--instructions-scale);
       width: auto;
@@ -38,15 +38,17 @@
 
     /* Testo Tap to Start */
     #tapText {
-      margin-top: 20px;
-      font-size: 1.2rem;
+      position: absolute;      /* assoluto sull'overlay */
+      bottom: 10%;             /* verso il basso */
+      width: 100%;             /* occupa tutta la larghezza */
+      text-align: center;
+      font-size: 2rem;
       color: black;
-      opacity: 0;43
+      opacity: 0;
       transition: opacity 1s ease-in-out;
-      font-family: Arial, sans-serif;
       cursor: pointer;
-      position: relative;
-      z-index: 10;
+      z-index: 10;             /* sopra l'immagine */
+      font-family: Arial, sans-serif;
     }
     #tapText.show { opacity: 1; }
 
@@ -96,17 +98,18 @@
     /* Inizio scena nascosta */
     a-scene { display: none; }
 
+    /* Nascondi pulsante VR di A-Frame */
     .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- Overlay 1 -->
+  <!-- Overlay 1: count2.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count2.png" alt="Intro">
   </div>
 
-  <!-- Overlay 2 -->
+  <!-- Overlay 2: instructions.png -->
   <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
@@ -145,45 +148,5 @@
   </a-scene>
 
   <script src="js/main.js"></script>
-
-  <script>
-    window.addEventListener("load", () => {
-      const intro = document.getElementById("introOverlay");
-      const instructions = document.getElementById("instructionsOverlay");
-      const tapText = document.getElementById("tapText");
-      const sceneEl = document.querySelector("a-scene");
-
-      // Overlay 1
-      setTimeout(() => intro.classList.add("show"), 100);
-      setTimeout(() => {
-        intro.classList.remove("show");
-        intro.classList.add("hide");
-        setTimeout(() => {
-          intro.remove();
-
-          // Overlay 2
-          instructions.style.opacity = 1;
-          setTimeout(() => instructions.classList.add("show"), 100);
-          setTimeout(() => tapText.classList.add("show"), 3000);
-
-          // Tap anywhere to start
-          document.body.addEventListener("click", async () => {
-            instructions.classList.add("hide");
-            setTimeout(() => instructions.remove(), 1000);
-
-            sceneEl.style.display = "flex";
-
-            const mindarSystem = sceneEl.systems["mindar-image-system"];
-            await mindarSystem.start();
-
-            const vrButton = document.querySelector(".a-enter-vr-button");
-            if(vrButton) vrButton.remove();
-          }, { once: true });
-
-        }, 1000);
-      }, 5000);
-    });
-  </script>
-
 </body>
 </html>
