@@ -88,6 +88,11 @@
 
     /* Inizio scena nascosta */
     a-scene { display: none; }
+
+    /* Nascondi definitivamente il pulsante VR di A-Frame */
+    .a-enter-vr-button {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +178,10 @@
             // Avvia MindAR manualmente
             const mindarSystem = sceneEl.systems["mindar-image-system"];
             await mindarSystem.start();
+
+            // Rimuove pulsante VR se ancora presente
+            const vrButton = document.querySelector(".a-enter-vr-button");
+            if(vrButton) vrButton.remove();
 
             // Gestione visibilità scanner
             const marker = document.getElementById("marker");
