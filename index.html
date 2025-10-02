@@ -27,12 +27,8 @@
       max-width: 80%;
       max-height: 80%;
     }
-    .overlay.show {
-      opacity: 1;
-    }
-    .overlay.hide {
-      opacity: 0;
-    }
+    .overlay.show { opacity: 1; }
+    .overlay.hide { opacity: 0; }
 
     /* Testo Tap to Start */
     #tapText {
@@ -44,9 +40,7 @@
       font-family: Arial, sans-serif;
       cursor: pointer;
     }
-    #tapText.show {
-      opacity: 1;
-    }
+    #tapText.show { opacity: 1; }
 
     /* Custom scanning UI */
     #custom-scanning-ui {
@@ -60,16 +54,18 @@
       justify-content: center;
       align-items: center;
       z-index: 998;
+      transition: opacity 0.5s ease;
     }
+    #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
+    #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
     /* Angoli */
     .corner {
       position: absolute;
       width: 40px;
       height: 40px;
-      border: 6px solid #ffffff; /* bianco e più spesso */
+      border: 6px solid #ffffff;
     }
-
     .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
     .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
     .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
@@ -78,9 +74,9 @@
     /* Barra centrale animata */
     #custom-scanning-ui .scan-bar {
       position: absolute;
-      width: calc(80%); /* larghezza rettangolo tra i corner */
-      height: 6px; /* più spessa */
-      background: #ffffff; /* bianca */
+      width: calc(80%);
+      height: 6px;
+      background: #ffffff;
       top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
@@ -91,9 +87,7 @@
     }
 
     /* Inizio scena nascosta */
-    a-scene {
-      display: none;
-    }
+    a-scene { display: none; }
   </style>
 </head>
 <body>
@@ -110,23 +104,20 @@
   </div>
 
   <!-- Custom MindAR scanning UI -->
-  <div id="custom-scanning-ui" class="hidden">
-    <!-- Angoli -->
+  <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
     <div class="corner bottom-left"></div>
     <div class="corner bottom-right"></div>
-
-    <!-- Barra centrale animata -->
     <div class="scan-bar"></div>
   </div>
 
   <!-- Scena AR -->
   <a-scene 
-    mindar-image="imageTargetSrc: targets/target.mind; uiScanning:#custom-scanning-ui"
+    mindar-image="imageTargetSrc: targets/target.mind; uiScanning:#custom-scanning-ui; uiLoading: ; uiError: ;"
     color-space="sRGB"
     renderer="colorManagement: true"
-    vr-mode-ui="enabled: false"  <!-- pulsante VR rimosso -->
+    vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
 
     <a-assets>
@@ -153,6 +144,7 @@
       const instructions = document.getElementById("instructionsOverlay");
       const tapText = document.getElementById("tapText");
       const sceneEl = document.querySelector("a-scene");
+      const scanningUI = document.getElementById("custom-scanning-ui");
 
       // Overlay 1 (count2.png)
       setTimeout(() => intro.classList.add("show"), 100);
@@ -181,6 +173,18 @@
             // Avvia MindAR manualmente
             const mindarSystem = sceneEl.systems["mindar-image-system"];
             await mindarSystem.start();
+
+            // Gestione visibilità scanner
+            const marker = document.getElementById("marker");
+            marker.addEventListener("targetFound", () => {
+              scanningUI.classList.remove("visible");
+              scanningUI.classList.add("hidden");
+            });
+            marker.addEventListener("targetLost", () => {
+              scanningUI.classList.remove("hidden");
+              scanningUI.classList.add("visible");
+            });
+
           }, { once: true });
 
         }, 1000);
