@@ -67,7 +67,7 @@
       position: absolute;
       width: 40px;
       height: 40px;
-      border: 4px solid #00ff00;
+      border: 6px solid #ffffff; /* bianco e più spesso */
     }
 
     .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
@@ -79,8 +79,8 @@
     #custom-scanning-ui .scan-bar {
       position: absolute;
       width: calc(80%); /* larghezza rettangolo tra i corner */
-      height: 4px;
-      background: #00ff00;
+      height: 6px; /* più spessa */
+      background: #ffffff; /* bianca */
       top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
@@ -126,7 +126,7 @@
     mindar-image="imageTargetSrc: targets/target.mind; uiScanning:#custom-scanning-ui"
     color-space="sRGB"
     renderer="colorManagement: true"
-    vr-mode-ui="enabled: false"
+    vr-mode-ui="enabled: false"  <!-- pulsante VR rimosso -->
     device-orientation-permission-ui="enabled: false">
 
     <a-assets>
