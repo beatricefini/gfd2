@@ -7,6 +7,11 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
+    :root {
+      /* Imposta qui la scala dell'immagine instructions da 0% a 100% */
+      --instructions-scale: 100%;
+    }
+
     /* Overlay base */
     .overlay {
       position: fixed;
@@ -23,9 +28,11 @@
       transition: opacity 1s ease-in-out;
       z-index: 9999;
     }
-    .overlay img {
-      max-width: 80%;
-      max-height: 80%;
+    .overlay img { 
+      max-width: var(--instructions-scale);
+      max-height: var(--instructions-scale);
+      width: auto;
+      height: auto;
     }
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
@@ -80,7 +87,6 @@
       top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
-
     @keyframes moveBar {
       0% { top: 10%; }
       100% { top: 70%; }
@@ -89,10 +95,8 @@
     /* Inizio scena nascosta */
     a-scene { display: none; }
 
-    /* Nascondi definitivamente il pulsante VR di A-Frame */
-    .a-enter-vr-button {
-      display: none !important;
-    }
+    /* Nascondi pulsante VR di A-Frame */
+    .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
@@ -142,16 +146,14 @@
 
   <script src="js/main.js"></script>
 
-  <!-- Script overlay e avvio MindAR -->
   <script>
     window.addEventListener("load", () => {
       const intro = document.getElementById("introOverlay");
       const instructions = document.getElementById("instructionsOverlay");
       const tapText = document.getElementById("tapText");
       const sceneEl = document.querySelector("a-scene");
-      const scanningUI = document.getElementById("custom-scanning-ui");
 
-      // Overlay 1 (count2.png)
+      // Overlay 1
       setTimeout(() => intro.classList.add("show"), 100);
       setTimeout(() => {
         intro.classList.remove("show");
@@ -159,41 +161,24 @@
         setTimeout(() => {
           intro.remove();
 
-          // Mostra overlay 2
+          // Overlay 2
           instructions.style.opacity = 1;
           setTimeout(() => instructions.classList.add("show"), 100);
-
-          // Dopo 3s appare "Tap to start"
           setTimeout(() => tapText.classList.add("show"), 3000);
 
-          // Al click l'utente fa partire l'esperienza
           instructions.addEventListener("click", async () => {
             instructions.classList.remove("show");
             instructions.classList.add("hide");
             setTimeout(() => instructions.remove(), 1000);
 
-            // Mostra la scena AR
             sceneEl.style.display = "flex";
 
-            // Avvia MindAR manualmente
             const mindarSystem = sceneEl.systems["mindar-image-system"];
             await mindarSystem.start();
 
-            // Rimuove pulsante VR se ancora presente
+            // Rimuove pulsante VR
             const vrButton = document.querySelector(".a-enter-vr-button");
             if(vrButton) vrButton.remove();
-
-            // Gestione visibilità scanner
-            const marker = document.getElementById("marker");
-            marker.addEventListener("targetFound", () => {
-              scanningUI.classList.remove("visible");
-              scanningUI.classList.add("hidden");
-            });
-            marker.addEventListener("targetLost", () => {
-              scanningUI.classList.remove("hidden");
-              scanningUI.classList.add("visible");
-            });
-
           }, { once: true });
 
         }, 1000);
