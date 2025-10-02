@@ -1,3 +1,4 @@
+// JS: gestione puzzle e scene AR
 document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const container = document.getElementById("piecesContainer");
@@ -5,18 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const scanningUI = document.getElementById("custom-scanning-ui");
 
   const rows = 3, cols = 3, pieceSize = 0.3, pieceGap = 0.01;
-  const grid = [];
-  const pieces = [];
-  let emptyPos = { row: 2, col: 0 };
+  const grid = []; const pieces = [];
+  let emptyPos = { row:2, col:0 };
 
-  function getWorldPos(row, col) {
-    const x = (col - (cols-1)/2)*(pieceSize+pieceGap);
-    const y = ((rows-1)/2 - row)*(pieceSize+pieceGap);
-    return { x, y, z: 0.01 };
+  function getWorldPos(row,col){
+    const x = (col-(cols-1)/2)*(pieceSize+pieceGap);
+    const y = ((rows-1)/2-row)*(pieceSize+pieceGap);
+    return { x, y, z:0.01 };
   }
 
-  function createEmptyHole() {
-    if (!document.getElementById("hole")) {
+  function createEmptyHole(){
+    if(!document.getElementById("hole")){
       const hole = document.createElement("a-plane");
       hole.setAttribute("width", pieceSize);
       hole.setAttribute("height", pieceSize);
@@ -34,12 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     plane.setAttribute("height", pieceSize);
     plane.setAttribute("material", { src:`images/puzzle/row-${r+1}-column-${c+1}.jpg` });
     plane.setAttribute("position", getWorldPos(r,c));
-    plane.dataset.row = r;
-    plane.dataset.col = c;
-    plane.dataset.correctRow = r;
-    plane.dataset.correctCol = c;
-    container.appendChild(plane);
-    pieces.push(plane);
+    plane.dataset.row=r; plane.dataset.col=c;
+    plane.dataset.correctRow=r; plane.dataset.correctCol=c;
+    container.appendChild(plane); pieces.push(plane);
     grid[`${r},${c}`] = plane;
   }
 
@@ -48,28 +45,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function tryMove(piece){
-    const r = parseInt(piece.dataset.row);
-    const c = parseInt(piece.dataset.col);
+    const r=parseInt(piece.dataset.row), c=parseInt(piece.dataset.col);
     if(!isAdjacent(r,c,emptyPos.row,emptyPos.col)) return;
-    grid[`${r},${c}`] = null;
-    piece.dataset.row = emptyPos.row;
-    piece.dataset.col = emptyPos.col;
-    grid[`${emptyPos.row},${emptyPos.col}`] = piece;
-    emptyPos = { row:r, col:c };
+    grid[`${r},${c}`]=null;
+    piece.dataset.row=emptyPos.row; piece.dataset.col=emptyPos.col;
+    grid[`${emptyPos.row},${emptyPos.col}`]=piece;
+    emptyPos={ row:r, col:c };
 
     const targetPos = getWorldPos(piece.dataset.row,piece.dataset.col);
     const startPos = piece.object3D.position.clone();
-    const duration=250;
-    const startTime=performance.now();
-    function easeOutQuad(t){return t*(2-t);}
+    const duration=250, startTime=performance.now();
+    function easeOutQuad(t){ return t*(2-t); }
     function animate(){
       const elapsed = performance.now()-startTime;
       const t = Math.min(elapsed/duration,1);
-      const easedT = easeOutQuad(t);
-      piece.object3D.position.lerpVectors(startPos,targetPos,easedT);
+      piece.object3D.position.lerpVectors(startPos,targetPos,easeOutQuad(t));
       if(t<1) requestAnimationFrame(animate);
       else {
-        const holeEl = document.getElementById("hole");
+        const holeEl=document.getElementById("hole");
         if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row,emptyPos.col));
         checkSolved();
       }
@@ -82,33 +75,28 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let p of pieces){
       if(parseInt(p.dataset.row)!==parseInt(p.dataset.correctRow) ||
          parseInt(p.dataset.col)!==parseInt(p.dataset.correctCol)){
-        solved=false;
-        break;
+        solved=false; break;
       }
     }
+
     if(solved){
-      // Rimuove la scritta "Solve the sliding puzzle"
-      const puzzleText = document.getElementById('puzzleText');
+      // Rimuove scritta puzzle
+      const puzzleText=document.getElementById('puzzleText');
       if(puzzleText) puzzleText.parentNode.removeChild(puzzleText);
 
       pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
-      const holeEl = document.getElementById("hole");
+      const holeEl=document.getElementById("hole");
       if(holeEl) holeEl.parentNode.removeChild(holeEl);
 
       // Full image finale
-      const fullImage = document.createElement("a-plane");
+      const fullImage=document.createElement("a-plane");
       fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
       fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
       fullImage.setAttribute("material", { src:"images/puzzle.jpg", opacity:1, transparent:true });
       fullImage.setAttribute("position",{x:0,y:0,z:0.02});
       container.appendChild(fullImage);
-
       fullImage.setAttribute("animation__float", {
-        property:"position",
-        dir:"alternate",
-        dur:1500,
-        easing:"easeInOutSine",
-        loop:true,
+        property:"position", dir:"alternate", dur:1500, easing:"easeInOutSine", loop:true,
         to:`0 0.2 0.02`
       });
 
@@ -116,151 +104,116 @@ document.addEventListener("DOMContentLoaded", () => {
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation",{x:0,y:0,z:0});
         fullImage.setAttribute("animation__scale",{
-          property:"scale",
-          to:"0.3 0.3 1",
-          dur:1000,
-          easing:"easeInOutQuad"
+          property:"scale", to:"0.3 0.3 1", dur:1000, easing:"easeInOutQuad"
         });
 
         setTimeout(()=>{
           fullImage.setAttribute("animation__opacity",{
-            property:"material.opacity",
-            to:0.5,
-            dur:500,
-            easing:"easeInOutQuad"
+            property:"material.opacity", to:0.5, dur:500, easing:"easeInOutQuad"
           });
 
           // Modello cinema
-          const cinemaModel = document.createElement('a-entity');
+          const cinemaModel=document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model','#cinemaModel');
           cinemaModel.setAttribute('position',{x:0.1,y:-0.4,z:0.5});
           cinemaModel.setAttribute('scale',{x:2,y:2,z:2});
           container.appendChild(cinemaModel);
 
-          // =====================
-// Testo "1960" con bordo
-// =====================
-const text1960 = document.createElement('a-text');
-text1960.setAttribute('value', '1960');
-text1960.setAttribute('align', 'center');
-text1960.setAttribute('anchor', 'center');
-text1960.setAttribute('color', '#000000');
-text1960.setAttribute('font', 'roboto');
-text1960.setAttribute('position', { x:0, y: baseHeight+0.5, z:0.5 });
-text1960.setAttribute('scale', '0.5 0.5 0.5');
-text1960.setAttribute('opacity', '0');
-text1960.setAttribute('shader', 'msdf');
-text1960.setAttribute('negate', 'false');
-text1960.setAttribute('animation__fadein', {
-  property: 'opacity',
-  from: 0,
-  to: 1,
-  dur: 800,
-  easing: 'easeInQuad',
-  delay: 200
-});
-container.appendChild(text1960);
+          // --- Testo "1960" con bordo ---
+          const text1960=document.createElement('a-text');
+          text1960.setAttribute('value','1960');
+          text1960.setAttribute('align','center');
+          text1960.setAttribute('anchor','center');
+          text1960.setAttribute('color','#000000');
+          text1960.setAttribute('font','roboto');
+          text1960.setAttribute('position',{x:0,y:0.25,z:0.5});
+          text1960.setAttribute('scale','0.5 0.5 0.5');
+          text1960.setAttribute('opacity','0');
+          text1960.setAttribute('shader','msdf');
+          text1960.setAttribute('negate','false');
+          text1960.setAttribute('animation__fadein',{ property:'opacity', from:0, to:1, dur:800, easing:'easeInQuad', delay:200 });
+          container.appendChild(text1960);
 
-// Outline sottile (bordo nero)
-const border1960 = document.createElement('a-text');
-border1960.setAttribute('value', '1960');
-border1960.setAttribute('align', 'center');
-border1960.setAttribute('anchor', 'center');
-border1960.setAttribute('color', '#000000'); // bordo nero
-border1960.setAttribute('font', 'roboto');
-border1960.setAttribute('position', { x:0.005, y: baseHeight+0.5, z:0.49 });
-border1960.setAttribute('scale', '0.5 0.5 0.5');
-border1960.setAttribute('opacity', '1');
-border1960.setAttribute('shader', 'msdf');
-container.appendChild(border1960);
+          const border1960=document.createElement('a-text');
+          border1960.setAttribute('value','1960');
+          border1960.setAttribute('align','center');
+          border1960.setAttribute('anchor','center');
+          border1960.setAttribute('color','#000000');
+          border1960.setAttribute('font','roboto');
+          border1960.setAttribute('position',{x:0.005,y:0.25,z:0.49});
+          border1960.setAttribute('scale','0.5 0.5 0.5');
+          border1960.setAttribute('opacity','1');
+          border1960.setAttribute('shader','msdf');
+          container.appendChild(border1960);
 
-// =====================
-// Testo "New facade" con bordo
-// =====================
-const textFacade = document.createElement('a-text');
-textFacade.setAttribute('value', 'New facade');
-textFacade.setAttribute('align', 'center');
-textFacade.setAttribute('anchor', 'center');
-textFacade.setAttribute('color', '#000000');
-textFacade.setAttribute('font', 'roboto');
-textFacade.setAttribute('position', { x:0, y: baseHeight+0.4, z:0.5 });
-textFacade.setAttribute('scale', '0.35 0.35 0.35');
-textFacade.setAttribute('opacity', '0');
-textFacade.setAttribute('shader', 'msdf');
-textFacade.setAttribute('negate', 'false');
-textFacade.setAttribute('animation__fadein', {
-  property: 'opacity',
-  from: 0,
-  to: 1,
-  dur: 800,
-  easing: 'easeInQuad',
-  delay: 1200
-});
-container.appendChild(textFacade);
+          // --- Testo "New facade" con bordo ---
+          const textFacade=document.createElement('a-text');
+          textFacade.setAttribute('value','New facade');
+          textFacade.setAttribute('align','center');
+          textFacade.setAttribute('anchor','center');
+          textFacade.setAttribute('color','#000000');
+          textFacade.setAttribute('font','roboto');
+          textFacade.setAttribute('position',{x:0,y:0.15,z:0.5});
+          textFacade.setAttribute('scale','0.35 0.35 0.35');
+          textFacade.setAttribute('opacity','0');
+          textFacade.setAttribute('shader','msdf');
+          textFacade.setAttribute('negate','false');
+          textFacade.setAttribute('animation__fadein',{ property:'opacity', from:0, to:1, dur:800, easing:'easeInQuad', delay:1200 });
+          container.appendChild(textFacade);
 
-// Outline sottile (bordo nero)
-const borderFacade = document.createElement('a-text');
-borderFacade.setAttribute('value', 'New facade');
-borderFacade.setAttribute('align', 'center');
-borderFacade.setAttribute('anchor', 'center');
-borderFacade.setAttribute('color', '#000000'); // bordo nero
-borderFacade.setAttribute('font', 'roboto');
-borderFacade.setAttribute('position', { x:0.005, y: baseHeight+0.4, z:0.49 });
-borderFacade.setAttribute('scale', '0.35 0.35 0.35');
-borderFacade.setAttribute('opacity', '1');
-borderFacade.setAttribute('shader', 'msdf');
-container.appendChild(borderFacade);
+          const borderFacade=document.createElement('a-text');
+          borderFacade.setAttribute('value','New facade');
+          borderFacade.setAttribute('align','center');
+          borderFacade.setAttribute('anchor','center');
+          borderFacade.setAttribute('color','#000000');
+          borderFacade.setAttribute('font','roboto');
+          borderFacade.setAttribute('position',{x:0.005,y:0.15,z:0.49});
+          borderFacade.setAttribute('scale','0.35 0.35 0.35');
+          borderFacade.setAttribute('opacity','1');
+          borderFacade.setAttribute('shader','msdf');
+          container.appendChild(borderFacade);
 
-
-          setTimeout(showOutro,10000); // durata finale scena
+          setTimeout(showOutro,10000);
         },1000);
       },3000);
     }
   }
 
   function showOutro(){
-    const outroOverlay = document.createElement('div');
-    outroOverlay.id = "outroOverlay";
+    const outroOverlay=document.createElement('div');
+    outroOverlay.id="outroOverlay";
     outroOverlay.style.position="fixed";
-    outroOverlay.style.top="0";
-    outroOverlay.style.left="0";
-    outroOverlay.style.width="100vw";
-    outroOverlay.style.height="100vh";
+    outroOverlay.style.top="0"; outroOverlay.style.left="0";
+    outroOverlay.style.width="100vw"; outroOverlay.style.height="100vh";
     outroOverlay.style.backgroundColor="black";
-    outroOverlay.style.display="flex";
-    outroOverlay.style.justifyContent="center";
-    outroOverlay.style.alignItems="center";
-    outroOverlay.style.zIndex="9999";
-    outroOverlay.style.opacity="0";
-    outroOverlay.style.transition="opacity 1s ease-in-out";
+    outroOverlay.style.display="flex"; outroOverlay.style.justifyContent="center"; outroOverlay.style.alignItems="center";
+    outroOverlay.style.zIndex="9999"; outroOverlay.style.opacity="0"; outroOverlay.style.transition="opacity 1s ease-in-out";
 
-    const img = document.createElement("img");
+    const img=document.createElement("img");
     img.src="images/outro2.png";
-    img.style.maxWidth="100%";
-    img.style.maxHeight="100%";
+    img.style.maxWidth="100%"; img.style.maxHeight="100%";
     outroOverlay.appendChild(img);
 
     document.body.appendChild(outroOverlay);
-
-    setTimeout(()=>{outroOverlay.style.opacity="1";},100);
+    setTimeout(()=>{ outroOverlay.style.opacity="1"; },100);
   }
 
-  // Raycaster
+  // --- Raycaster ---
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   function updateMouse(event){
     if(event.touches){
-      mouse.x=(event.touches[0].clientX/window.innerWidth)*2-1;
-      mouse.y=-(event.touches[0].clientY/window.innerHeight)*2+1;
+      mouse.x = (event.touches[0].clientX/window.innerWidth)*2-1;
+      mouse.y = -(event.touches[0].clientY/window.innerHeight)*2+1;
     } else {
-      mouse.x=(event.clientX/window.innerWidth)*2-1;
-      mouse.y=-(event.clientY/window.innerHeight)*2+1;
+      mouse.x = (event.clientX/window.innerWidth)*2-1;
+      mouse.y = -(event.clientY/window.innerHeight)*2+1;
     }
   }
   function onPointerDown(event){
     updateMouse(event);
     raycaster.setFromCamera(mouse,cameraEl.getObject3D('camera'));
-    const intersects = raycaster.intersectObjects(pieces.map(p=>p.object3D),true);
+    const intersects=raycaster.intersectObjects(pieces.map(p=>p.object3D),true);
     if(intersects.length>0) tryMove(intersects[0].object.el);
   }
   window.addEventListener('mousedown',onPointerDown);
@@ -269,14 +222,9 @@ container.appendChild(borderFacade);
   function shuffle(times=10){
     for(let i=0;i<times;i++){
       const neighbors=[];
-      const { row,col } = emptyPos;
-      [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
-        if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
-      });
-      if(neighbors.length>0){
-        const piece = neighbors[Math.floor(Math.random()*neighbors.length)];
-        tryMove(piece);
-      }
+      const {row,col}=emptyPos;
+      [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{ if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]); });
+      if(neighbors.length>0) tryMove(neighbors[Math.floor(Math.random()*neighbors.length)]);
     }
   }
 
@@ -285,22 +233,18 @@ container.appendChild(borderFacade);
     scanningUI.classList.remove("visible");
 
     if(pieces.length===0){
-      // Crea scritta "Solve the sliding puzzle"
-      const puzzleText = document.createElement('a-text');
+      const puzzleText=document.createElement('a-text');
       puzzleText.setAttribute('value','Solve the sliding puzzle');
       puzzleText.setAttribute('align','center');
       puzzleText.setAttribute('anchor','center');
       puzzleText.setAttribute('color','#ffffff');
-      puzzleText.setAttribute('position',{x:0, y:0.5, z:0.5});
+      puzzleText.setAttribute('position',{x:0,y:0.5,z:0.5});
       puzzleText.setAttribute('scale','0.5 0.5 0.5');
       puzzleText.setAttribute('id','puzzleText');
       container.appendChild(puzzleText);
 
-      // Crea pezzi del puzzle
       for(let r=0;r<rows;r++){
-        for(let c=0;c<cols;c++){
-          createPiece(r,c);
-        }
+        for(let c=0;c<cols;c++){ createPiece(r,c); }
       }
       createEmptyHole();
       shuffle(10);
@@ -311,5 +255,4 @@ container.appendChild(borderFacade);
     scanningUI.classList.remove("hidden");
     scanningUI.classList.add("visible");
   });
-
 });
