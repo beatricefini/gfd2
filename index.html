@@ -29,18 +29,16 @@
     /* Tap to Start */
     #tapText {
       position: absolute;
-      bottom: 10%;
+      bottom: 15%;
       left: 50%;
       transform: translateX(-50%);
       font-size: 1.2rem;
       color: black;
       font-family: 'Roboto', sans-serif;
       cursor: pointer;
-      opacity: 0;
+      opacity: 1;
       z-index: 2;
-      transition: opacity 1s ease-in-out;
     }
-    #tapText.show { opacity: 1; }
 
     /* Custom scanning UI */
     #custom-scanning-ui {
@@ -104,7 +102,7 @@
   </div>
 
   <!-- Overlay instructions -->
-  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0; flex-direction: column; position: relative;">
+  <div id="instructionsOverlay" class="overlay" style="display:flex; flex-direction: column; position: relative;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
@@ -155,7 +153,6 @@
     window.addEventListener("load", () => {
       const intro = document.getElementById("introOverlay");
       const instructions = document.getElementById("instructionsOverlay");
-      const tapText = document.getElementById("tapText");
       const outro = document.getElementById("outroOverlay");
       const sceneEl = document.querySelector("a-scene");
       const scanningUI = document.getElementById("custom-scanning-ui");
@@ -169,12 +166,9 @@
 
         // Instructions overlay
         instructions.style.opacity = 1;
-        setTimeout(() => instructions.classList.add("show"), 100);
-        // Tap subito visibile
-        tapText.classList.add("show");
 
-        // Tap listener
-        tapText.addEventListener("click", async () => {
+        // Listener sull'intero overlay
+        instructions.addEventListener("click", async () => {
           instructions.classList.remove("show");
           instructions.classList.add("hide");
           setTimeout(() => instructions.remove(), 500);
@@ -199,6 +193,7 @@
           const vrButton = document.querySelector(".a-enter-vr-button");
           if(vrButton) vrButton.remove();
         }, { once: true });
+
       }, 5000);
     });
   </script>

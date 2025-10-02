@@ -20,20 +20,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const hole = document.createElement("a-plane");
       hole.setAttribute("width", pieceSize);
       hole.setAttribute("height", pieceSize);
-      hole.setAttribute("material", {color:"#555", opacity:0.3, transparent:true});
+      hole.setAttribute("material",{color:"#555", opacity:0.3, transparent:true});
       hole.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
       hole.setAttribute("id","hole");
       container.appendChild(hole);
     }
   }
 
-  function createPiece(r,c) {
+  function createPiece(r,c){
     if(r===emptyPos.row && c===emptyPos.col) return;
     const plane = document.createElement("a-plane");
     plane.setAttribute("width",pieceSize);
     plane.setAttribute("height",pieceSize);
     plane.setAttribute("material",{src:`images/puzzle/row-${r+1}-column-${c+1}.jpg`});
-    plane.setAttribute("position",getWorldPos(r,c));
+    plane.setAttribute("position", getWorldPos(r,c));
     plane.dataset.row=r; plane.dataset.col=c;
     plane.dataset.correctRow=r; plane.dataset.correctCol=c;
     container.appendChild(plane);
@@ -73,12 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let solved=true;
     for(let p of pieces){
       if(parseInt(p.dataset.row)!==parseInt(p.dataset.correctRow)||
-         parseInt(p.dataset.col)!==parseInt(p.dataset.correctCol)){
-        solved=false; break;
-      }
+         parseInt(p.dataset.col)!==parseInt(p.dataset.correctCol)){ solved=false; break; }
     }
     if(solved){
-      puzzleTitle.style.opacity=0; // nasconde titolo
+      puzzleTitle.style.opacity=0;
       pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
       const holeEl=document.getElementById("hole");
       if(holeEl) holeEl.parentNode.removeChild(holeEl);
@@ -91,22 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
       container.appendChild(fullImage);
 
       fullImage.setAttribute("animation__float",{
-        property:"position",
-        dir:"alternate",
-        dur:1500,
-        easing:"easeInOutSine",
-        loop:true,
-        to:"0 0.2 0.02"
+        property:"position", dir:"alternate", dur:1500, easing:"easeInOutSine", loop:true, to:"0 0.2 0.02"
       });
 
       setTimeout(()=>{
         fullImage.removeAttribute("animation__float");
         fullImage.setAttribute("rotation",{x:0,y:0,z:0});
         fullImage.setAttribute("animation__scale",{property:"scale",to:"0.3 0.3 1",dur:1000,easing:"easeInOutQuad"});
-
         setTimeout(()=>{
           fullImage.setAttribute("animation__opacity",{property:"material.opacity",to:0.5,dur:500,easing:"easeInOutQuad"});
-
           const baseHeight=-0.25;
           const cinemaModel=document.createElement("a-entity");
           cinemaModel.setAttribute("gltf-model","#cinemaModel");
@@ -140,10 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
           textFacade.setAttribute("animation__fadein",{property:"opacity",from:0,to:1,dur:800,easing:"easeInQuad",delay:1200});
           container.appendChild(textFacade);
 
-          // Dopo 10s mostra overlay outro
-          setTimeout(()=>{
-            outroOverlay.classList.add("show");
-          },10000);
+          // Outro overlay dopo 10s
+          setTimeout(()=>{ outroOverlay.classList.add("show"); }, 10000);
 
         },1000);
       },3000);
@@ -185,11 +174,10 @@ document.addEventListener("DOMContentLoaded", () => {
       for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){ createPiece(r,c); }}
       createEmptyHole();
       shuffle(10);
-      puzzleTitle.style.opacity=1; // mostra titolo
+      puzzleTitle.style.opacity=1;
     } else {
       const holeEl=document.getElementById("hole");
       if(holeEl) holeEl.setAttribute("position",getWorldPos(emptyPos.row,emptyPos.col));
     }
   });
-
 });
