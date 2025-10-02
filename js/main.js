@@ -182,9 +182,42 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           container.appendChild(textFacade);
 
+          // Mostra outro dopo 5 secondi
+          setTimeout(showOutro, 5000);
+
         }, 1000);
       }, 3000);
     }
+  }
+
+  function showOutro() {
+    const outroOverlay = document.createElement('div');
+    outroOverlay.id = "outroOverlay";
+    outroOverlay.style.position = "fixed";
+    outroOverlay.style.top = "0";
+    outroOverlay.style.left = "0";
+    outroOverlay.style.width = "100vw";
+    outroOverlay.style.height = "100vh";
+    outroOverlay.style.backgroundColor = "black";
+    outroOverlay.style.display = "flex";
+    outroOverlay.style.justifyContent = "center";
+    outroOverlay.style.alignItems = "center";
+    outroOverlay.style.zIndex = "9999";
+    outroOverlay.style.opacity = "0";
+    outroOverlay.style.transition = "opacity 1s ease-in-out";
+
+    const img = document.createElement("img");
+    img.src = "images/outro2.png";
+    img.style.maxWidth = "80%";
+    img.style.maxHeight = "80%";
+    outroOverlay.appendChild(img);
+
+    document.body.appendChild(outroOverlay);
+
+    // Fade-in
+    setTimeout(() => {
+      outroOverlay.style.opacity = "1";
+    }, 100);
   }
 
   // Raycaster
@@ -238,14 +271,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       createEmptyHole();
       shuffle(10);
-    } else {
-      const holeEl = document.getElementById("hole");
-      if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
     }
   });
 
   marker.addEventListener('targetLost', () => {
-    scanningUI.classList.remove("hidden"); // mostra scanner se target perso
+    scanningUI.classList.remove("hidden"); // mostra scanner quando target perso
   });
-});
 
+});
