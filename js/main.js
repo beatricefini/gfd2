@@ -133,8 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
           // Modello cinema
           const cinemaModel = document.createElement('a-entity');
           cinemaModel.setAttribute('gltf-model','#cinemaModel');
-          cinemaModel.setAttribute('position',{x:0.1,y:-0.4,z:0.5});
-          cinemaModel.setAttribute('scale',{x:1.2,y:1.2,z:1.2});
+          cinemaModel.setAttribute('position',{x:0.1,y:-0.4,z:0.1});
+          cinemaModel.setAttribute('scale',{x:1.5,y:1.5,z:1.5});
           container.appendChild(cinemaModel);
 
           // Testo "1960"
