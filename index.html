@@ -3,14 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Puzzle Cinema</title>
+  <title>AR Modelli Ordinati</title>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    :root {
-      --instructions-scale: 100%;
-    }
-
     /* Overlay base */
     .overlay {
       position: fixed;
@@ -28,8 +24,8 @@
       z-index: 9999;
     }
     .overlay img {
-      max-width: var(--instructions-scale);
-      max-height: var(--instructions-scale);
+      max-width: 100%;
+      max-height: 100%;
       width: auto;
       height: auto;
     }
@@ -38,16 +34,16 @@
 
     /* Testo Tap to Start */
     #tapText {
-      position: absolute;      /* assoluto sull'overlay */
-      bottom: 10%;             /* verso il basso */
-      width: 100%;             /* occupa tutta la larghezza */
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
       text-align: center;
       font-size: 1.2rem;
       color: black;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       cursor: pointer;
-      z-index: 10;             /* sopra l'immagine */
+      z-index: 10;
       font-family: Arial, sans-serif;
     }
     #tapText.show { opacity: 1; }
@@ -84,36 +80,20 @@
     /* Barra centrale animata */
     #custom-scanning-ui .scan-bar {
       position: absolute;
-      width: calc(80%);
+      width: 80%;
       height: 6px;
       background: #ffffff;
       top: 10%;
       animation: moveBar 2s infinite alternate ease-in-out;
     }
-    @keyframes moveBar {
-      0% { top: 10%; }
-      100% { top: 70%; }
-    }
+    @keyframes moveBar { 0% { top: 10%; } 100% { top: 70%; } }
 
-    /* Inizio scena nascosta */
+    /* Scena inizialmente nascosta */
     a-scene { display: none; }
-
-    /* Nascondi pulsante VR di A-Frame */
     .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
-
-  <!-- Overlay 1: count2.png -->
-  <div id="introOverlay" class="overlay">
-    <img src="images/count2.png" alt="Intro">
-  </div>
-
-  <!-- Overlay 2: instructions.png -->
-  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
-    <img src="images/instructions.png" alt="Instructions">
-    <div id="tapText">Tap to start</div>
-  </div>
 
   <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
@@ -125,28 +105,99 @@
   </div>
 
   <!-- Scena AR -->
-  <a-scene 
-    mindar-image="imageTargetSrc: targets/target.mind; uiScanning:#custom-scanning-ui; uiLoading: ; uiError: ;"
+  <a-scene
+    mindar-image="imageTargetSrc: targets/target.mind; uiError:no; uiLoading:no; uiScanning:no;"
     color-space="sRGB"
     renderer="colorManagement: true"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
 
     <a-assets>
-      <a-asset-item id="cinemaModel" src="models/piece_cinema2.glb"></a-asset-item>
+      <a-asset-item id="piece1" src="models/piece1.glb"></a-asset-item>
+      <a-asset-item id="piece2" src="models/piece2.glb"></a-asset-item>
+      <a-asset-item id="piece3" src="models/piece3.glb"></a-asset-item>
+      <a-asset-item id="piece4" src="models/piece4.glb"></a-asset-item>
+      <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
+      <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
+      <a-asset-item id="piece7" src="models/piece7.glb"></a-asset-item>
+      <a-asset-item id="pieceCinema" src="models/piece_cinema4.glb"></a-asset-item>
     </a-assets>
 
+    <!-- Camera bloccata -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+    <!-- Luci -->
     <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.6" position="0 1 1"></a-entity>
 
+    <!-- Target AR -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
-      <a-entity id="piecesContainer"></a-entity>
+      <a-entity id="introTexts"></a-entity>
+      <a-entity id="modelsContainer"></a-entity>
     </a-entity>
 
   </a-scene>
 
   <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sceneEl = document.querySelector("a-scene");
+      const intro = document.createElement("div");
+      const instructions = document.createElement("div");
+      const tapText = document.createElement("div");
+      const scanningUI = document.getElementById("custom-scanning-ui");
+      const marker = document.getElementById("marker");
+
+      // --- Overlay iniziale count4.png ---
+      intro.id = "introOverlay";
+      intro.className = "overlay";
+      const introImg = document.createElement("img");
+      introImg.src = "images/count4.png";
+      intro.appendChild(introImg);
+      document.body.appendChild(intro);
+
+      setTimeout(() => intro.classList.add("show"), 100);
+      setTimeout(() => { intro.classList.remove("show"); intro.classList.add("hide"); setTimeout(()=>intro.remove(),1000); }, 5000);
+
+      // --- Overlay istruzioni instructions.png ---
+      instructions.id = "instructionsOverlay";
+      instructions.className = "overlay";
+      const instrImg = document.createElement("img");
+      instrImg.src = "images/instructions.png";
+      instructions.appendChild(instrImg);
+
+      tapText.id = "tapText";
+      tapText.innerText = "Tap to start";
+      instructions.appendChild(tapText);
+      document.body.appendChild(instructions);
+
+      setTimeout(() => { instructions.classList.add("show"); tapText.classList.add("show"); }, 6000);
+
+      instructions.addEventListener("click", async () => {
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(() => instructions.remove(), 1000);
+
+        // Mostra scena e avvia MindAR
+        sceneEl.style.display = "flex";
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
+
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if(vrButton) vrButton.remove();
+      }, { once: true });
+
+      // --- Scanner UI visibile finché marker non trovato ---
+      marker.addEventListener('targetFound', () => {
+        scanningUI.classList.add("hidden");
+        scanningUI.classList.remove("visible");
+      });
+
+      marker.addEventListener('targetLost', () => {
+        scanningUI.classList.remove("hidden");
+        scanningUI.classList.add("visible");
+      });
+    });
+  </script>
 </body>
 </html>
