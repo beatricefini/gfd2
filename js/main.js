@@ -1,212 +1,317 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("🚀 main.js avviato");
-
-  const container = document.getElementById('modelsContainer');
   const marker = document.getElementById("marker");
+  const container = document.getElementById("piecesContainer");
+  const cameraEl = document.querySelector("a-camera");
+  const scanningUI = document.getElementById("custom-scanning-ui");
+
+  const rows = 3, cols = 3, pieceSize = 0.3, pieceGap = 0.01;
+  const grid = [];
+  const pieces = [];
+  let emptyPos = { row: 2, col: 0 };
+
+  function getWorldPos(row, col) {
+    const x = (col - (cols-1)/2)*(pieceSize+pieceGap);
+    const y = ((rows-1)/2 - row)*(pieceSize+pieceGap);
+    return { x, y, z: 0.01 };
+  }
+
+  function createEmptyHole() {
+    if (!document.getElementById("hole")) {
+      const hole = document.createElement("a-plane");
+      hole.setAttribute("width", pieceSize);
+      hole.setAttribute("height", pieceSize);
+      hole.setAttribute("material", { color:"#555555", opacity:0.3, transparent:true });
+      hole.setAttribute("position", getWorldPos(emptyPos.row, emptyPos.col));
+      hole.setAttribute("id","hole");
+      container.appendChild(hole);
+    }
+  }
+
+  function createPiece(r,c){
+    if(r===emptyPos.row && c===emptyPos.col) return;
+    const plane = document.createElement("a-plane");
+    plane.setAttribute("width", pieceSize);
+    plane.setAttribute("height", pieceSize);
+    plane.setAttribute("material", { src:`images/puzzle/row-${r+1}-column-${c+1}.jpg` });
+    plane.setAttribute("position", getWorldPos(r,c));
+    plane.dataset.row = r;
+    plane.dataset.col = c;
+    plane.dataset.correctRow = r;
+    plane.dataset.correctCol = c;
+    container.appendChild(plane);
+    pieces.push(plane);
+    grid[`${r},${c}`] = plane;
+  }
+
+  function isAdjacent(r1,c1,r2,c2){
+    return Math.abs(r1-r2)+Math.abs(c1-c2)===1;
+  }
+
+  function tryMove(piece){
+    const r = parseInt(piece.dataset.row);
+    const c = parseInt(piece.dataset.col);
+    if(!isAdjacent(r,c,emptyPos.row,emptyPos.col)) return;
+    grid[`${r},${c}`] = null;
+    piece.dataset.row = emptyPos.row;
+    piece.dataset.col = emptyPos.col;
+    grid[`${emptyPos.row},${emptyPos.col}`] = piece;
+    emptyPos = { row:r, col:c };
+
+    const targetPos = getWorldPos(piece.dataset.row,piece.dataset.col);
+    const startPos = piece.object3D.position.clone();
+    const duration=250;
+    const startTime=performance.now();
+    function easeOutQuad(t){return t*(2-t);}
+    function animate(){
+      const elapsed = performance.now()-startTime;
+      const t = Math.min(elapsed/duration,1);
+      const easedT = easeOutQuad(t);
+      piece.object3D.position.lerpVectors(startPos,targetPos,easedT);
+      if(t<1) requestAnimationFrame(animate);
+      else {
+        const holeEl = document.getElementById("hole");
+        if(holeEl) holeEl.setAttribute("position", getWorldPos(emptyPos.row,emptyPos.col));
+        checkSolved();
+      }
+    }
+    animate();
+  }
+
+  function checkSolved(){
+    let solved=true;
+    for(let p of pieces){
+      if(parseInt(p.dataset.row)!==parseInt(p.dataset.correctRow) ||
+         parseInt(p.dataset.col)!==parseInt(p.dataset.correctCol)){
+        solved=false;
+        break;
+      }
+    }
+    if(solved){
+      // Rimuove la scritta "Solve the sliding puzzle"
+      const puzzleText = document.getElementById('puzzleText');
+      if(puzzleText) puzzleText.remove();
+
+      pieces.forEach(p=>{if(p.parentNode) p.parentNode.removeChild(p);});
+      const holeEl = document.getElementById("hole");
+      if(holeEl) holeEl.parentNode.removeChild(holeEl);
+
+      // Full image finale
+      const fullImage = document.createElement("a-plane");
+      fullImage.setAttribute("width", pieceSize*cols + pieceGap*(cols-1));
+      fullImage.setAttribute("height", pieceSize*rows + pieceGap*(rows-1));
+      fullImage.setAttribute("material", { src:"images/puzzle.jpg", opacity:1, transparent:true });
+      fullImage.setAttribute("position",{x:0,y:0,z:0.02});
+      container.appendChild(fullImage);
+
+      fullImage.setAttribute("animation__float", {
+        property:"position",
+        dir:"alternate",
+        dur:1500,
+        easing:"easeInOutSine",
+        loop:true,
+        to:`0 0.2 0.02`
+      });
+
+      setTimeout(()=>{
+        fullImage.removeAttribute("animation__float");
+        fullImage.setAttribute("rotation",{x:0,y:0,z:0});
+        fullImage.setAttribute("animation__scale",{
+          property:"scale",
+          to:"0.3 0.3 1",
+          dur:1000,
+          easing:"easeInOutQuad"
+        });
+
+        setTimeout(()=>{
+          fullImage.setAttribute("animation__opacity",{
+            property:"material.opacity",
+            to:0.5,
+            dur:500,
+            easing:"easeInOutQuad"
+          });
+
+          // Modello cinema
+          const cinemaModel = document.createElement('a-entity');
+          cinemaModel.setAttribute('gltf-model','#cinemaModel');
+          cinemaModel.setAttribute('position',{x:0.1,y:-0.4,z:0.5});
+          cinemaModel.setAttribute('scale',{x:2,y:2,z:2});
+          container.appendChild(cinemaModel);
+
+          // Testo "1960"
+          const text1960 = document.createElement('a-text');
+          text1960.setAttribute('value', '1960');
+          text1960.setAttribute('align', 'center');
+          text1960.setAttribute('anchor', 'center');
+          text1960.setAttribute('color', '#000000');
+          text1960.setAttribute('font', 'roboto'); // font originale
+          text1960.setAttribute('position', { x:0, y:0.5, z:0.5 });
+          text1960.setAttribute('scale', '0.5 0.5 0.5');
+          text1960.setAttribute('opacity', '0');
+          text1960.setAttribute('shader', 'msdf');
+          text1960.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 200
+          });
+          container.appendChild(text1960);
+
+          // Testo "New facade"
+          const textFacade = document.createElement('a-text');
+          textFacade.setAttribute('value', 'New facade');
+          textFacade.setAttribute('align', 'center');
+          textFacade.setAttribute('anchor', 'center');
+          textFacade.setAttribute('color', '#000000');
+          textFacade.setAttribute('font', 'roboto'); // font originale
+          textFacade.setAttribute('position', { x:0, y:0.4, z:0.5 });
+          textFacade.setAttribute('scale', '0.35 0.35 0.35');
+          textFacade.setAttribute('opacity', '0');
+          textFacade.setAttribute('shader', 'msdf');
+          textFacade.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 1200
+          });
+          container.appendChild(textFacade);
+
+          setTimeout(showOutro,10000); // durata finale scena
+        },1000);
+      },3000);
+    }
+  }
+
+  function showOutro(){
+    const outroOverlay = document.createElement('div');
+    outroOverlay.id = "outroOverlay";
+    outroOverlay.style.position="fixed";
+    outroOverlay.style.top="0";
+    outroOverlay.style.left="0";
+    outroOverlay.style.width="100vw";
+    outroOverlay.style.height="100vh";
+    outroOverlay.style.backgroundColor="black";
+    outroOverlay.style.display="flex";
+    outroOverlay.style.justifyContent="center";
+    outroOverlay.style.alignItems="center";
+    outroOverlay.style.zIndex="9999";
+    outroOverlay.style.opacity="0";
+    outroOverlay.style.transition="opacity 1s ease-in-out";
+
+    const img = document.createElement("img");
+    img.src="images/outro2.png";
+    img.style.maxWidth="100%";
+    img.style.maxHeight="100%";
+    outroOverlay.appendChild(img);
+
+    document.body.appendChild(outroOverlay);
+
+    setTimeout(()=>{outroOverlay.style.opacity="1";},100);
+  }
+
+  // Raycaster per puzzle
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  function updateMouse(event){
+    if(event.touches){
+      mouse.x=(event.touches[0].clientX/window.innerWidth)*2-1;
+      mouse.y=-(event.touches[0].clientY/window.innerHeight)*2+1;
+    } else {
+      mouse.x=(event.clientX/window.innerWidth)*2-1;
+      mouse.y=-(event.clientY/window.innerHeight)*2+1;
+    }
+  }
+  function onPointerDown(event){
+    updateMouse(event);
+    raycaster.setFromCamera(mouse,cameraEl.getObject3D('camera'));
+    const intersects = raycaster.intersectObjects(pieces.map(p=>p.object3D),true);
+    if(intersects.length>0) tryMove(intersects[0].object.el);
+  }
+  window.addEventListener('mousedown',onPointerDown);
+  window.addEventListener('touchstart',onPointerDown,{passive:false});
+
+  function shuffle(times=10){
+    for(let i=0;i<times;i++){
+      const neighbors=[];
+      const { row,col } = emptyPos;
+      [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
+        if(grid[`${r},${c}`]) neighbors.push(grid[`${r},${c}`]);
+      });
+      if(neighbors.length>0){
+        const piece = neighbors[Math.floor(Math.random()*neighbors.length)];
+        tryMove(piece);
+      }
+    }
+  }
+
+  // OVERLAY LOGIC
+  const intro = document.getElementById("introOverlay");
+  const instructions = document.getElementById("instructionsOverlay");
+  const tapText = document.getElementById("tapText");
   const sceneEl = document.querySelector("a-scene");
 
-  if (!container) {
-    console.error("❌ modelsContainer non trovato!");
-    return;
-  }
+  // Overlay 1
+  setTimeout(() => intro.classList.add("show"), 100);
+  setTimeout(() => {
+    intro.classList.remove("show");
+    intro.classList.add("hide");
+    setTimeout(() => { intro.remove(); 
+      // Overlay 2
+      instructions.style.opacity = 1;
+      setTimeout(() => instructions.classList.add("show"), 100);
+      setTimeout(() => tapText.classList.add("show"), 500);
 
-  // --- Sequenza modelli AR ---
-  function initModelsSequence() {
-    const models = [
-      '#piece1','#piece2','#piece3','#piece4','#piece5','#piece6','#piece7'
-    ];
-    let currentIndex = 0;
+      instructions.addEventListener("click", async () => {
+        // Fade out overlay
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(()=> instructions.remove(), 1000);
 
-    const baseHeight = -0.5;
-    const baseScale = 0.7;
-    const scaleOffset = 0.1;
-    const popupDuration = 800;
-    const stabilizeDuration = 600;
-    const reversePopDuration = 400;
+        sceneEl.style.display = "flex";
 
-    // Video HTML per piece7
-    const video7 = document.createElement('video');
-    video7.id = "video7";
-    video7.src = "video/piece7.mp4";
-    video7.loop = true;
-    video7.autoplay = false;
-    video7.playsInline = true;
-    video7.webkitPlaysInline = true;
-    document.body.appendChild(video7);
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
 
-    // Testo iniziale "Tap the screen..."
-    const startText = document.createElement('a-text');
-    startText.setAttribute('value', 'Tap the screen\nto create your\nown little cinema');
-    startText.setAttribute('align', 'center');
-    startText.setAttribute('color', '#000000');
-    startText.setAttribute('font', 'roboto');
-    startText.setAttribute('position', { x:0, y:baseHeight+0.8, z:0 });
-    startText.setAttribute('scale', { x:1, y:1, z:1 });
-    startText.setAttribute('width','2');
-    container.appendChild(startText);
+        // Rimuove pulsante VR
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if(vrButton) vrButton.remove();
+      }, { once: true });
+    }, 1000);
+  }, 5000);
 
-    let firstClick = true;
+  // MARKER EVENTS
+  marker.addEventListener('targetFound',()=>{ 
+    scanningUI.classList.add("hidden");
+    scanningUI.classList.remove("visible");
 
-    window.addEventListener('click', () => {
-      if(firstClick){
-        startText.setAttribute('visible','false');
-        firstClick=false;
-        return;
+    if(pieces.length===0){
+      // Scritta "Solve the sliding puzzle" nera
+      const puzzleText = document.createElement('a-text');
+      puzzleText.setAttribute('value','Solve the sliding puzzle');
+      puzzleText.setAttribute('align','center');
+      puzzleText.setAttribute('anchor','center');
+      puzzleText.setAttribute('color','#000000'); // solo nero
+      puzzleText.setAttribute('position',{x:0, y:0.65, z:0.5});
+      puzzleText.setAttribute('scale','0.25 0.25 0.25');
+      puzzleText.setAttribute('id','puzzleText');
+      container.appendChild(puzzleText);
+
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          createPiece(r,c);
+        }
       }
-      if(currentIndex >= models.length) return;
-
-      const piece = document.createElement('a-entity');
-      piece.setAttribute('gltf-model', models[currentIndex]);
-
-      // Scala casuale
-      const finalScale = baseScale + (Math.random()-0.5)*scaleOffset;
-      piece.setAttribute('scale', { x: finalScale, y: finalScale, z: finalScale });
-
-      // Posizione pavimento + offset casuale
-      const offsetX = (Math.random()-0.5)*0.2;
-      const offsetZ = (Math.random()-0.5)*0.2;
-      piece.setAttribute('position', { x: offsetX, y: baseHeight, z: offsetZ });
-
-      // Rotazione iniziale instabile
-      const rotX = (Math.random()-0.5)*20;
-      const rotY = (Math.random()-0.5)*20;
-      piece.setAttribute('rotation', { x: rotX, y: rotY, z: 0 });
-
-      // Animazioni pop-up e stabilizzazione
-      piece.setAttribute('animation__popup', {
-        property: 'position',
-        from: `0 ${baseHeight-1} 0`,
-        to: `0 ${baseHeight} 0`,
-        dur: popupDuration,
-        easing: 'easeOutElastic'
-      });
-      piece.setAttribute('animation__stabilize', {
-        property: 'rotation',
-        to: '0 0 0',
-        dur: stabilizeDuration,
-        easing: 'easeOutQuad',
-        delay: 300
-      });
-
-      // Gestione video piece7
-      if(currentIndex === models.length-1){
-        piece.id = "piece7";
-        piece.addEventListener('model-loaded', () => {
-          setTimeout(() => {
-            const mesh = piece.getObject3D('mesh');
-            if(mesh){
-              mesh.traverse(node => {
-                if(node.isMesh){
-                  const videoTexture = new THREE.VideoTexture(video7);
-                  videoTexture.flipY = false;
-                  videoTexture.center.set(0.5,0.5);
-                  videoTexture.repeat.x = -1;
-                  node.material.map = videoTexture;
-                  node.material.needsUpdate = true;
-                }
-              });
-            }
-            video7.play().catch(e => console.error("❌ Impossibile avviare video piece7:", e));
-            setTimeout(removeAllPiecesAndShowFinal, 4000);
-          }, 3000);
-        });
-      }
-
-      container.appendChild(piece);
-      currentIndex++;
-    });
-
-    // Rimuove tutti i pezzi e mostra modello finale
-    function removeAllPiecesAndShowFinal(){
-      const pieces = Array.from(container.querySelectorAll('a-entity[gltf-model]'));
-      pieces.forEach((piece,i) => {
-        piece.setAttribute('animation__shrink',{
-          property:'scale',
-          to:'0 0 0',
-          dur: reversePopDuration,
-          easing:'easeInBack',
-          delay: i*150
-        });
-        setTimeout(()=>piece.remove(), reversePopDuration + i*150 + 50);
-      });
-      const totalDelay = pieces.length*150 + reversePopDuration + 200;
-      setTimeout(createFinalModel, totalDelay);
+      createEmptyHole();
+      shuffle(10);
     }
-
-    // Modello finale con testi
-    function createFinalModel(){
-      const finalModel = document.createElement('a-entity');
-      finalModel.setAttribute('gltf-model','#pieceCinema');
-      finalModel.setAttribute('scale','0 0 0');
-      finalModel.setAttribute('position',{x:0.25,y:baseHeight,z:0});
-      finalModel.setAttribute('animation__pop',{
-        property:'scale',
-        from:'0 0 0',
-        to:'2 2 2',
-        dur:1200,
-        easing:'easeOutElastic'
-      });
-      container.appendChild(finalModel);
-
-      // Testi finali
-      const text1994 = document.createElement('a-text');
-      text1994.setAttribute('value','1994');
-      text1994.setAttribute('align','center');
-      text1994.setAttribute('anchor','center');
-      text1994.setAttribute('color','#000000');
-      text1994.setAttribute('font','roboto');
-      text1994.setAttribute('position',{x:0,y:baseHeight+0.7,z:0});
-      text1994.setAttribute('scale','0.7 0.7 0.7');
-      text1994.setAttribute('opacity','0');
-      text1994.setAttribute('shader','msdf');
-      text1994.setAttribute('negate','false');
-      text1994.setAttribute('animation__fadein',{
-        property:'opacity',
-        from:0,
-        to:1,
-        dur:800,
-        easing:'easeInQuad',
-        delay:200
-      });
-      container.appendChild(text1994);
-
-      const textRenovation = document.createElement('a-text');
-      textRenovation.setAttribute('value','Renovation');
-      textRenovation.setAttribute('align','center');
-      textRenovation.setAttribute('anchor','center');
-      textRenovation.setAttribute('color','#000000');
-      textRenovation.setAttribute('font','roboto');
-      textRenovation.setAttribute('position',{x:0,y:baseHeight+0.55,z:0});
-      textRenovation.setAttribute('scale','0.4 0.4 0.4');
-      textRenovation.setAttribute('opacity','0');
-      textRenovation.setAttribute('shader','msdf');
-      textRenovation.setAttribute('negate','false');
-      textRenovation.setAttribute('animation__fadein',{
-        property:'opacity',
-        from:0,
-        to:1,
-        dur:800,
-        easing:'easeInQuad',
-        delay:1200
-      });
-      container.appendChild(textRenovation);
-
-      // Overlay finale outro4.png
-      setTimeout(() => {
-        const outroOverlay = document.createElement('div');
-        outroOverlay.id = "outroOverlay";
-        outroOverlay.className = "overlay";
-        const img = document.createElement('img');
-        img.src = "images/outro4.png";
-        outroOverlay.appendChild(img);
-        document.body.appendChild(outroOverlay);
-        setTimeout(()=>outroOverlay.classList.add("show"), 100);
-      }, 10000);
-    }
-  }
-
-  // Inizializza sequenza modelli quando il marker viene trovato
-  marker.addEventListener('targetFound', () => {
-    initModelsSequence();
   });
+
+  marker.addEventListener('targetLost',()=>{
+    scanningUI.classList.remove("hidden");
+    scanningUI.classList.add("visible");
+  });
+
 });
